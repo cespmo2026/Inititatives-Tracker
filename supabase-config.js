@@ -1,19 +1,14 @@
 (() => {
   "use strict";
- 
+
   const projectUrl = "https://dwqnaxfrldqnoiklwqzb.supabase.co";
   const publishableKey = "sb_publishable_vsOSXP1sWzqwayxDZ3zx_Q_WFzL6ga2";
- 
+
   if (!window.supabase?.createClient) {
     throw new Error("Supabase JS did not load. Check the network connection and CDN access.");
   }
- 
+
   window.orbitSupabase = window.supabase.createClient(projectUrl, publishableKey);
-  window.orbitUsernameEmail = (value) => {
-    const normalized = value.trim().toLowerCase();
-    return normalized.includes("@") ? normalized : `${normalized}@orbit.demo`;
-  };
- 
   const style = document.createElement("style");
   style.textContent = `
     body:not(.orbit-authenticated) .app { display: none !important; }
@@ -29,16 +24,16 @@
     .orbit-signout { margin-left: 10px; padding: 8px 11px; border: 1px solid #cfe3d3; border-radius: 9px; background: white; color: #2b6846; cursor: pointer; }
   `;
   document.head.append(style);
- 
+
   window.orbitAuthenticate = async (requiredRole, onAuthenticated) => {
     const gate = document.createElement("div");
     gate.id = "orbit-auth-gate";
     gate.hidden = true;
     gate.innerHTML = `<form id="orbit-auth-form">
       <h1>Orbit ${requiredRole === "manager" ? "manager" : "employee"} sign in</h1>
-      <p>Sign in with your Orbit demo username or email and its password assigned in Supabase Auth. Demo usernames: ram, sreeyuth, sreeman, sanjana, sravya; manager: nikitha.</p>
-      <label for="orbit-auth-username">Username or email</label>
-      <input id="orbit-auth-username" autocomplete="username" required>
+      <p>Sign in with your organization email and password.</p>
+      <label for="orbit-auth-email">Organization email</label>
+      <input id="orbit-auth-email" type="email" autocomplete="username" required>
       <label for="orbit-auth-password">Password</label>
       <input id="orbit-auth-password" type="password" autocomplete="current-password" required>
       <button id="orbit-auth-submit" type="submit">Sign in</button>
@@ -75,7 +70,7 @@
       }
     });
     document.querySelector(".top-actions")?.append(signout);
- 
+
     const authenticateSession = async (session) => {
       if (!session?.user) {
         showGate();
@@ -101,14 +96,14 @@
       showApp();
       await onAuthenticated(session.user, profile);
     };
- 
+
     gate.querySelector("#orbit-auth-form").addEventListener("submit", async (event) => {
       event.preventDefault();
       submit.disabled = true;
       errorMessage.textContent = "";
       try {
         const { data, error } = await window.orbitSupabase.auth.signInWithPassword({
-          email: window.orbitUsernameEmail(gate.querySelector("#orbit-auth-username").value),
+          email: gate.querySelector("#orbit-auth-email").value.trim(),
           password: gate.querySelector("#orbit-auth-password").value
         });
         if (error) throw error;
@@ -120,7 +115,7 @@
         submit.disabled = false;
       }
     });
- 
+
     window.orbitSupabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") showGate("You have been signed out.");
     });
@@ -134,5 +129,4 @@
     }
   };
 })();
- 
  

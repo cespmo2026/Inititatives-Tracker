@@ -74,9 +74,19 @@
     .project-name { font-size: 14px; line-height: 1.4; font-weight: 700; }
     .project-card .progress-meta { margin-top: 15px; }
     .project-card-description { display: -webkit-box; overflow: hidden; margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+    .detail-project-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .detail-project-heading h2 { min-width: 0; }
+    .project-status-select { width: auto; min-width: 132px; min-height: 34px; padding: 6px 30px 6px 10px; border: 1px solid #a9d3b4; border-radius: 9px; background: #f3fbf4; color: #175b3b; font-size: 11px; font-weight: 650; }
+    .project-progress-editor { display: flex; align-items: center; gap: 6px; }
+    .project-progress-editor input { width: 74px; min-height: 32px; padding: 4px 6px; text-align: right; }
+    .project-progress-editor .primary-button { min-height: 32px; padding: 6px 10px; font-size: 10px; }
+    .project-progress-editor .progress-suffix { color: var(--ink); font-size: 11px; font-weight: 700; }
+    .project-tracking-message { margin: 7px 0 0; color: var(--red); font-size: 10px; }
+    .project-tracking-message:empty { display: none; }
     .release-links { display: grid; gap: 9px; }
-    .release-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: #f7f8f4; }
+    .release-link { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 9px; background: #f7f8f4; }
     .release-link-title { min-width: 0; overflow-wrap: anywhere; font-size: 11px; font-weight: 700; }
+    .release-link-description { margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
     .release-link a { flex: 0 0 auto; color: var(--blue); font-size: 11px; font-weight: 650; }
     .release-link-form { display: grid; gap: 9px; margin-top: 14px; }
     .release-link-form .primary-button { justify-self: start; }
@@ -86,6 +96,14 @@
     .milestone-form[hidden] { display: none; }
     .milestone-message { grid-column: 1 / -1; min-height: 0; margin: 0; color: var(--red); font-size: 10px; }
     .milestone-message:empty { display: none; }
+    .milestone-project-layout { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 24px; }
+    .milestone-project-layout > .subsection { min-width: 0; }
+    .milestone-subsection-head { justify-content: flex-start; }
+    .milestone-subsection-head h3 { margin-right: auto; }
+    .milestone-add-action { flex: 0 0 auto; }
+    .release-content-layout { display: grid; gap: 0; }
+    .release-content-layout .release-link-form { order: 1; }
+    .release-content-layout .release-links { order: 2; }
     .update-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .update-actions [hidden] { display: none; }
     .update-state { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
@@ -160,6 +178,8 @@
     .milestone-name { font-size: 10px; font-weight: 650; line-height: 1.4; }
     .milestone-date { color: var(--muted); font-size: 9px; white-space: nowrap; }
     .milestone-state { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .milestone-feedback { display: grid; gap: 3px; margin-top: 8px; padding: 8px 10px; border-radius: 7px; background: #f1f8f1; color: #58647a; font-size: 9px; line-height: 1.5; }
+    .milestone-feedback strong { color: var(--green); font-size: 9px; }
     .feedback-card { padding: 12px; border: 1px solid #e5e7ed; border-radius: 9px; background: #f2f3f4; }
     .feedback-by { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
     .feedback-by .avatar { width: 25px; height: 25px; font-size: 9px; background: #eeeaff; }
@@ -238,6 +258,7 @@
       main { padding: 23px 18px 35px; }
       .project-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .stats { grid-template-columns: repeat(2, 1fr); }
+      .milestone-project-layout { gap: 12px; }
     }
     @media (max-width: 480px) {
       main { padding: 18px 12px 28px; }
@@ -1519,9 +1540,9 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
 #project-detail-modal.modal-backdrop.open{display:block!important;position:fixed!important;left:var(--detail-left,224px)!important;top:var(--detail-top,0px)!important;right:0!important;bottom:0!important;z-index:20!important;padding:0!important;overflow:hidden!important;background:#f1f8f1!important}
 #project-detail-modal .project-detail-dialog{display:flex!important;flex-direction:column!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:100%!important;overflow:hidden!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 #project-detail-modal #detail-panel{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;border:0!important;border-radius:0!important}
-#project-detail-modal .detail-header{position:sticky;top:0;z-index:2}
-#project-detail-modal .detail-close{position:absolute!important;top:12px!important;right:12px!important}
-@media(max-width:620px){body.project-detail-open .sidebar{display:flex!important}body.project-detail-open .app{grid-template-columns:1fr!important}body.project-detail-open #project-detail-modal .detail-header{padding-right:58px!important}}
+#project-detail-modal .detail-header{position:sticky;top:0;z-index:2;padding-right:98px!important}
+#project-detail-modal .detail-close{position:absolute!important;top:12px!important;right:48px!important}
+@media(max-width:620px){body.project-detail-open .sidebar{display:flex!important}body.project-detail-open .app{grid-template-columns:1fr!important}body.project-detail-open #project-detail-modal .detail-header{padding-right:98px!important}}
 #project-detail-modal .detail-tab{font-size:12px!important}
 #project-detail-modal .detail-description{font-size:14px!important}
 #project-detail-modal .eyebrow{font-size:11px!important}
@@ -1549,7 +1570,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
   <div class="app">
     <aside class="sidebar">
       <div class="brand" aria-label="Internal Project Tracker home">
-        <img class="brand-logo" src="./ces%20logo.png" alt="CES logo"><span class="brand-word">Internal Project Tracker</span>
+        <svg class="brand-logo" viewBox="0 0 225 225" role="img" aria-label="CES logo"><path fill="#00528b" d="M48 61 181 28c15-4 28 7 34 20 4 10 1 20-4 31l-42 83c-9 18-26 30-47 25l-91-20c-22-5-27-20-23-39l10-42c4-16 14-22 30-25Z"/><text x="42" y="143" fill="#fff" font-family="Arial,sans-serif" font-size="68" font-weight="700" letter-spacing="-4">CES</text><path fill="#f7941d" d="M99 149h28v8H99z"/></svg><span class="brand-word">Internal Project Tracker</span>
       </div>
       <p class="nav-label">WORKSPACE</p>
       <nav class="nav" aria-label="Workspace navigation">
@@ -1659,7 +1680,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./supabase-config.js"></script>
+  <script src="./supabase.js"></script>
   <script>
     (() => {
       "use strict";
@@ -1777,13 +1798,18 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const results=await Promise.all([
           db.from("projects").select("*").in("id",projectIds),
           db.from("project_milestones").select("*").in("project_id",projectIds).order("sort_order"),
+          db.from("project_milestone_feedback").select("*").order("updated_at",{ascending:false}),
           db.from("project_updates").select("*").eq("employee_id",user.id).order("submitted_at",{ascending:false}),
-          db.from("project_feedback").select("*").in("project_id",projectIds).order("created_at",{ascending:false}),
-          db.from("timesheets").select("*").eq("employee_id",user.id).order("work_date",{ascending:false})
+          db.from("timesheets").select("*").eq("employee_id",user.id).order("work_date",{ascending:false}),
+          db.from("project_tracking").select("*").in("project_id",projectIds)
         ]);
         const failed=results.find((result)=>result.error);
         if(failed?.error)throw failed.error;
-        const [projectRows,milestoneRows,updateRows,feedbackRows,timesheetRows]=results.map((result)=>result.data||[]);
+        const [projectRows,milestoneRows,milestoneFeedbackRows,updateRows,timesheetRows,trackingRows]=results.map((result)=>result.data||[]);
+        const trackingByProject=new Map(trackingRows.map((item)=>[item.project_id,item]));
+        const milestoneFeedbackById=new Map(milestoneFeedbackRows.map((item)=>[item.milestone_id,{
+          text:item.feedback_text,date:item.updated_at
+        }]));
         const projectNames=new Map(projectRows.map((project)=>[project.id,project.name]));
         updates=updateRows.map((item)=>({
           id:item.id,employeeId:item.employee_id,projectId:item.project_id,
@@ -1801,27 +1827,24 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         releaseLoadError=releaseError;
         if(releaseError)console.error("Could not load project release links:",releaseError);
         releases=(releaseRows||[]).map((item)=>({
-          id:item.id,projectId:item.project_id,title:item.title,url:item.url,
+          id:item.id,projectId:item.project_id,title:item.title,url:item.url,description:item.description||"",
           employeeId:item.created_by,createdAt:Date.parse(item.created_at)||0
         }));
         projects=projectRows.map((item)=>{
           const projectUpdates=updates.filter((update)=>update.projectId===item.id);
           const latest=projectUpdates[0];
-          const feedback=feedbackRows.find((entry)=>entry.project_id===item.id&&
-            (entry.employee_id===user.id||entry.employee_id===null));
           return {
             id:item.id,employeeId:user.id,employeeIds:[user.id],
             name:item.name,client:item.department,description:item.description||"",
-            status:latest?.status||item.status,progress:latest?.progress??item.progress_pct,
+            status:trackingByProject.get(item.id)?.status||latest?.status||item.status,
+            progress:trackingByProject.get(item.id)?.progress_pct??latest?.progress??item.progress_pct,
             due:item.due_date,updated:latest?.date||item.updated_at?.slice(0,10)||item.due_date,
             priority:item.priority,blocker:latest?.blocker||"",
             releases:releases.filter((release)=>release.projectId===item.id),
             milestones:milestoneRows.filter((milestone)=>milestone.project_id===item.id).map((milestone)=>({
-              name:milestone.name,date:dateLabel(milestone.due_date),state:milestone.state
+              id:milestone.id,name:milestone.name,date:dateLabel(milestone.due_date),state:milestone.state,
+              feedback:milestoneFeedbackById.get(milestone.id)||null
             })),
-            feedback:feedback?{
-              by:"Manager",date:dateLabel(feedback.created_at.slice(0,10)),text:feedback.feedback_text
-            }:{by:"Manager",date:"",text:"No feedback yet."}
           };
         });
         if(!projects.some((project)=>project.id===selectedId))selectedId=projects[0]?.id||"";
@@ -1879,17 +1902,22 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const milestones = project.milestones.map((milestone) => `
           <div class="milestone ${esc(milestone.state)}">
             <span class="milestone-dot" aria-hidden="true"></span>
-            <div><div class="milestone-name">${esc(milestone.name)}</div><div class="milestone-state">${milestone.state === "done" ? "Completed" : milestone.state === "current" ? "In progress" : "Upcoming"}</div></div>
+            <div>
+              <div class="milestone-name">${esc(milestone.name)}</div>
+              <div class="milestone-state">${milestone.state === "done" ? "Completed" : milestone.state === "current" ? "In progress" : "Upcoming"}</div>
+              ${milestone.feedback?`<div class="milestone-feedback"><strong>Manager feedback</strong><span>${esc(milestone.feedback.text)}</span></div>`:""}
+            </div>
             <span class="milestone-date">${esc(milestone.date)}</span>
           </div>`).join("") || '<p class="muted">No milestones have been added yet.</p>';
         panel.innerHTML = `
           <div class="detail-header">
             <div class="detail-title-row">
-              <div><div class="eyebrow">${esc(project.client)}</div><h2 id="detail-project-name">${esc(project.name)}</h2><p class="detail-description">${esc(project.description)}</p></div>
+              <div><div class="eyebrow">${esc(project.client)}</div><div class="detail-project-heading"><h2 id="detail-project-name">${esc(project.name)}</h2><label class="sr-only" for="project-status-select">Project status</label><select class="project-status-select" id="project-status-select" aria-label="Project status"><option value="on-track" ${project.status === "on-track" ? "selected" : ""}>On track</option><option value="at-risk" ${project.status === "at-risk" ? "selected" : ""}>At risk</option><option value="blocked" ${project.status === "blocked" ? "selected" : ""}>Blocked</option></select></div><p class="detail-description">${esc(project.description)}</p></div>
               <div class="due-label">Due date<strong>${esc(dateLabel(project.due))}</strong></div>
             </div>
-            <div class="progress-meta"><span>Overall progress</span><strong>${project.progress}%</strong></div>
-            <div class="progress-track" aria-label="Project ${esc(project.progress)}% complete"><div class="progress-fill" style="width:${project.progress}%"></div></div>
+            <div class="progress-meta"><span>Overall progress</span><div class="project-progress-editor"><label class="sr-only" for="project-progress-input">Overall progress percent</label><input class="control" id="project-progress-input" type="number" min="0" max="100" step="1" value="${project.progress}" aria-label="Overall progress percentage"><span class="progress-suffix">%</span><button class="primary-button" id="save-project-progress" type="button">Save</button></div></div>
+            <div class="progress-track" id="project-progress-track" aria-label="Project ${esc(project.progress)}% complete"><div class="progress-fill" id="project-progress-fill" style="width:${project.progress}%"></div></div>
+            <p class="project-tracking-message" id="project-tracking-message" role="status" aria-live="polite"></p>
           </div>
           <div class="detail-tabs" role="group" aria-label="Project sections">
             <button class="detail-tab active" type="button" data-project-tab="details" aria-pressed="true">Project details</button>
@@ -1898,9 +1926,9 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           </div>
           <section class="detail-tab-panel" id="project-details-panel">
             <div class="detail-content">
-              <div>
-                <section class="subsection">
-                  <div class="subsection-head"><h3>Milestones</h3><div class="update-actions"><span class="badge ${esc(project.status)}">${esc(badgeLabel(project.status))}</span><button class="primary-button" id="add-milestone-toggle" type="button">Add milestone</button></div></div>
+              <div class="milestone-project-layout">
+                <section class="subsection milestone-list-column">
+                  <div class="subsection-head milestone-subsection-head"><h3>Milestones</h3><button class="primary-button milestone-add-action" id="add-milestone-toggle" type="button">Add milestone</button></div>
                   <div class="milestones">${milestones}</div>
                   <form class="milestone-form" id="milestone-form" hidden>
                     <div class="form-field"><label for="milestone-name">Milestone name</label><input class="control" id="milestone-name" maxlength="100" required></div>
@@ -1908,28 +1936,24 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
                     <button class="primary-button" type="submit">Save milestone</button>
                     <p class="milestone-message" id="milestone-message" role="alert" aria-live="polite"></p>
                   </form>
+                  ${project.blocker ? `<div class="blocker-note"><strong>Current blocker</strong>${esc(project.blocker)}</div>` : ""}
                 </section>
-                ${project.blocker ? `<section class="subsection"><div class="blocker-note"><strong>Current blocker</strong>${esc(project.blocker)}</div></section>` : ""}
               </div>
-              <section class="subsection">
-                <div class="subsection-head"><h3>Manager feedback</h3></div>
-                <div class="feedback-card">
-                  <div class="feedback-by"><div class="avatar" aria-hidden="true">N</div><div class="feedback-name">${esc(project.feedback.by)}<span class="feedback-date">${esc(project.feedback.date)}</span></div></div>
-                  <p class="feedback-text">${esc(project.feedback.text)}</p>
-                </div>
-              </section>
             </div>
           </section>
           <section class="detail-tab-panel" id="project-releases-panel" hidden>
-            ${releaseLoadError ? `<div class="empty-state" style="padding:10px">Release links could not be loaded. Apply the project-releases.sql setup in Supabase, then reload. ${esc(releaseLoadError.message)}</div>` : ""}
-            <div class="release-links">${releaseLoadError ? "" : project.releases.length ? project.releases.map((release) => `
-              <article class="release-link"><div class="release-link-title">${esc(release.title)}</div><a href="${esc(release.url)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a></article>`).join("") : '<div class="empty-state" style="padding:10px">No links have been added to this project yet.</div>'}</div>
-            <form class="release-link-form" id="release-link-form">
-              <div class="form-field"><label for="release-link-title">Name</label><input class="control" id="release-link-title" maxlength="100" placeholder="e.g. Production deployment" required></div>
-              <div class="form-field"><label for="release-link-url">URL</label><input class="control" id="release-link-url" type="url" maxlength="2048" placeholder="https://example.com" required></div>
-              <p class="release-message" id="release-message" role="alert" aria-live="polite"></p>
-              <button class="primary-button" type="submit">Add link</button>
-            </form>
+            <div class="release-content-layout">
+              <form class="release-link-form" id="release-link-form">
+                <div class="form-field"><label for="release-link-title">Name</label><input class="control" id="release-link-title" maxlength="100" placeholder="e.g. Production deployment" required></div>
+                <div class="form-field"><label for="release-link-url">URL</label><input class="control" id="release-link-url" type="url" maxlength="2048" placeholder="https://example.com" required></div>
+                <div class="form-field"><label for="release-link-description">Description</label><textarea class="control" id="release-link-description" maxlength="5000" rows="3" placeholder="Add a summary or important information about this link"></textarea></div>
+                <p class="release-message" id="release-message" role="alert" aria-live="polite"></p>
+                <button class="primary-button" type="submit">Add link</button>
+              </form>
+              ${releaseLoadError ? `<div class="empty-state" style="padding:10px">Release links could not be loaded. Apply migrations/20261026_project_releases.sql in Supabase, then reload. ${esc(releaseLoadError.message)}</div>` : ""}
+              <div class="release-links">${releaseLoadError ? "" : project.releases.length ? project.releases.map((release) => `
+                <article class="release-link"><div><div class="release-link-title">${esc(release.title)}</div>${release.description ? `<div class="release-link-description">${esc(release.description)}</div>` : ""}</div><a href="${esc(release.url)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a></article>`).join("") : '<div class="empty-state" style="padding:10px">No links have been added to this project yet.</div>'}</div>
+            </div>
           </section>
           <section class="detail-tab-panel" id="project-submit-panel" hidden>
             ${project.status !== "completed" ? (options.submitted ? `
@@ -1940,12 +1964,10 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
             </div>` : `
             <form class="update-box" id="update-form">
               <h3>Share a weekly update</h3>
-              <p class="update-state">Save a draft first, then edit it if needed and submit when it is final. Submitted updates cannot be edited. You may submit multiple updates on weekdays.</p>
+              <p class="update-state">Set project status beside the project name and edit progress in the banner above. Use this form for your weekly notes; submitted updates cannot be edited. You may submit multiple updates on weekdays.</p>
               <div class="form-grid">
                 <div class="form-field"><label for="week-ending">Update date</label><div class="week-ending-picker"><input class="control" id="week-ending" type="text" placeholder="Choose a weekday" readonly required aria-haspopup="dialog" aria-expanded="false"><button class="calendar-toggle" id="week-calendar-toggle" type="button" aria-label="Choose update date" aria-expanded="false">▦</button><div class="week-calendar" id="week-calendar" role="dialog" aria-label="Choose a weekday" hidden></div></div></div>
-                <div class="form-field"><label for="progress-input">Progress (%)</label><input class="control" id="progress-input" type="number" min="${project.progress}" max="100" value="${project.progress}" required></div>
               </div>
-              <div class="form-field"><label for="status-input">Project status</label><select class="control" id="status-input"><option value="on-track" ${project.status === "on-track" ? "selected" : ""}>On track</option><option value="at-risk" ${project.status === "at-risk" ? "selected" : ""}>At risk</option><option value="blocked" ${project.status === "blocked" ? "selected" : ""}>Blocked</option></select></div>
               <div class="form-field"><label for="update-text">What did you accomplish? What’s next?</label><textarea class="control" id="update-text" placeholder="Share progress, wins, or what you’re focusing on next…" required maxlength="1200"></textarea></div>
               <label class="check-row"><input id="blocker-check" type="checkbox"> I have a blocker to flag</label>
               <div class="form-field blocker-input" id="blocker-field" hidden><label for="blocker-text">Describe the blocker</label><textarea class="control" id="blocker-text" placeholder="What’s blocked, and what help do you need?" maxlength="500"></textarea></div>
@@ -1969,6 +1991,14 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           if (!form.hidden) $("#milestone-name").focus();
         });
         $("#milestone-form").addEventListener("submit", (event) => saveProjectMilestone(event, project));
+        const progressInput = $("#project-progress-input");
+        progressInput.addEventListener("input", () => {
+          const progress = Math.max(0, Math.min(100, Number(progressInput.value) || 0));
+          $("#project-progress-fill").style.width = `${progress}%`;
+          $("#project-progress-track").setAttribute("aria-label", `Project ${progress}% complete`);
+        });
+        $("#save-project-progress").addEventListener("click", () => saveProjectTracking(project));
+        $("#project-status-select").addEventListener("change", () => saveProjectTracking(project));
         const newUpdateButton = $("#new-weekly-update");
         if (newUpdateButton) {
           newUpdateButton.addEventListener("click", () => {
@@ -2030,8 +2060,6 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
             setCalendarOpen(false);
           };
           if (savedDraft) {
-            $("#progress-input").value = String(savedDraft.progress);
-            $("#status-input").value = savedDraft.status;
             $("#update-text").value = savedDraft.text;
             $("#blocker-check").checked = Boolean(savedDraft.blocker);
             $("#blocker-text").value = savedDraft.blocker || "";
@@ -2099,6 +2127,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const submitButton = form.querySelector('button[type="submit"]');
         const message = $("#release-message");
         const title = $("#release-link-title").value.trim();
+        const description = $("#release-link-description").value.trim();
         let url;
         try {
           url = new URL($("#release-link-url").value.trim());
@@ -2114,7 +2143,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         message.textContent = "";
         try {
           const { error } = await window.orbitSupabase.from("project_releases").insert({
-            project_id:project.id,created_by:employeeId,title,url:url.href
+            project_id:project.id,created_by:employeeId,title,url:url.href,description
           });
           if (error) throw error;
         } catch(error) {
@@ -2127,7 +2156,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           await loadPortalData(currentUser);
           renderDetail();
           setProjectTab("releases");
-          showToast("Deployed link added.");
+          showToast("Research and release link added.");
         } catch(error) {
           console.error("Deployed link saved but project data could not refresh:", error);
           message.textContent = `Link was saved, but the project could not refresh: ${error.message}`;
@@ -2168,8 +2197,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           const stored = localStorage.getItem(updateDraftKey(project));
           if (!stored) return null;
           const draft = JSON.parse(stored);
-          if (!draft || typeof draft !== "object" || !draft.date || !Number.isInteger(Number(draft.progress)) ||
-              !["on-track", "at-risk", "blocked"].includes(draft.status) || typeof draft.text !== "string") {
+          if (!draft || typeof draft !== "object" || !draft.date || typeof draft.text !== "string") {
             throw new Error("Saved weekly update draft has an invalid format.");
           }
           return draft;
@@ -2181,7 +2209,6 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       }
 
       async function saveWeeklyUpdateDraft(project, setDraftState) {
-        const progress = Number($("#progress-input").value);
         const message = $("#update-text").value.trim();
         const hasBlocker = $("#blocker-check").checked;
         const blocker = $("#blocker-text").value.trim();
@@ -2191,16 +2218,11 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           showToast("Choose a weekday for the update date.");
           return;
         }
-        if (!Number.isInteger(progress) || progress < project.progress || progress > 100) {
-          showToast(`Progress must be a whole number between ${project.progress}% and 100%.`);
-          $("#progress-input").focus();
-          return;
-        }
         if (!message || (hasBlocker && !blocker)) {
           showToast("Add your progress notes and describe the blocker before saving.");
           return;
         }
-        const draft = { date, progress, status: $("#status-input").value, text: message, blocker: hasBlocker ? blocker : "" };
+        const draft = { date, text: message, blocker: hasBlocker ? blocker : "" };
         try {
           localStorage.setItem(updateDraftKey(project), JSON.stringify(draft));
         } catch (error) {
@@ -2256,6 +2278,53 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         }
       }
 
+      async function saveProjectTracking(project) {
+        const status = $("#project-status-select").value;
+        const progress = Number($("#project-progress-input").value);
+        const button = $("#save-project-progress");
+        const statusSelect = $("#project-status-select");
+        const message = $("#project-tracking-message");
+        if (!["on-track", "at-risk", "blocked"].includes(status) ||
+            !Number.isInteger(progress) || progress < 0 || progress > 100) {
+          message.textContent = "Choose a valid status and a progress value between 0% and 100%.";
+          return;
+        }
+
+        button.disabled = true;
+        statusSelect.disabled = true;
+        message.textContent = "";
+        try {
+          const { error } = await window.orbitSupabase.from("project_tracking").upsert({
+            project_id: project.id,
+            progress_pct: progress,
+            status,
+            updated_by: employeeId,
+            updated_at: new Date().toISOString()
+          }, { onConflict: "project_id" });
+          if (error) throw error;
+        } catch (error) {
+          console.error("Could not save project status and progress:", error);
+          message.textContent = `Project status and progress could not be saved: ${error.message}`;
+          button.disabled = false;
+          statusSelect.disabled = false;
+          return;
+        }
+
+        try {
+          await loadPortalData(currentUser);
+          renderStats();
+          renderProjectList();
+          renderDetail();
+          setProjectTab("details");
+          showToast("Project status and progress saved.");
+        } catch (error) {
+          console.error("Project status and progress saved, but the project view could not refresh:", error);
+          message.textContent = `Status and progress were saved, but the project view could not refresh: ${error.message}`;
+          button.disabled = false;
+          statusSelect.disabled = false;
+        }
+      }
+
       function syncProjectDetailBounds() {
         const sidebar = $(".sidebar").getBoundingClientRect();
         const compactLayout = window.innerWidth <= 620;
@@ -2268,15 +2337,9 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         event.preventDefault();
         const project = getProject(selectedId);
         if (!project || project.status === "completed") return;
-        const progress = Number($("#progress-input").value);
         const message = $("#update-text").value.trim();
         const hasBlocker = $("#blocker-check").checked;
         const blocker = $("#blocker-text").value.trim();
-        if (!Number.isInteger(progress) || progress < project.progress || progress > 100) {
-          showToast(`Progress must be a whole number between ${project.progress}% and 100%.`);
-          $("#progress-input").focus();
-          return;
-        }
         if (!message || (hasBlocker && !blocker)) {
           showToast("Add your progress notes and describe the blocker before submitting.");
           return;
@@ -2287,12 +2350,11 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           showToast("Choose a weekday for the update date.");
           return;
         }
-        const nextStatus = $("#status-input").value;
         let error;
         try {
           ({error}=await window.orbitSupabase.from("project_updates").insert({
             project_id:project.id,employee_id:employeeId,week_ending:date,
-            progress_pct:progress,status:nextStatus,update_text:message,
+            progress_pct:project.progress,status:project.status,update_text:message,
             blocker:hasBlocker?blocker:null
           }));
         } catch(requestError) {

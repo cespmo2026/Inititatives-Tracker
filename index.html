@@ -52,22 +52,22 @@
 </head>
 <body>
   <main>
-    <div class="brand"><img class="brand-logo" src="./ces%20logo.png" alt="CES logo"><span>Internal Project Tracker</span></div>
+    <div class="brand"><svg class="brand-logo" viewBox="0 0 225 225" role="img" aria-label="CES logo"><path fill="#00528b" d="M48 61 181 28c15-4 28 7 34 20 4 10 1 20-4 31l-42 83c-9 18-26 30-47 25l-91-20c-22-5-27-20-23-39l10-42c4-16 14-22 30-25Z"/><text x="42" y="143" fill="#fff" font-family="Arial,sans-serif" font-size="68" font-weight="700" letter-spacing="-4">CES</text><path fill="#f7941d" d="M99 149h28v8H99z"/></svg><span>Internal Project Tracker</span></div>
     <p class="eyebrow">People · Projects · Progress</p>
     <h1>Welcome back</h1>
     <p class="intro">Sign in to continue to your workspace. We’ll take you to the right portal.</p>
     <form id="signin-form">
-      <label for="username">Username or email</label>
-      <input id="username" name="username" autocomplete="username" required>
+      <label for="email">Organization email</label>
+      <input id="email" name="email" type="email" autocomplete="username" required>
       <label for="password">Password</label>
       <input id="password" name="password" type="password" autocomplete="current-password" required>
       <button id="signin-submit" type="submit">Sign in</button>
       <p id="signin-error" role="alert" aria-live="polite"></p>
     </form>
-    <p class="help">Use your Internal Project Tracker account credentials. Your account role determines which portal opens.</p>
+    <p class="help">Sign in with your organization email and password. Your account role determines which portal opens.</p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./supabase-config.js"></script>
+  <script src="./supabase.js"></script>
   <script>
     (() => {
       "use strict";
@@ -80,8 +80,14 @@
         errorMessage.textContent = message;
       }
 
+      if (!window.orbitSupabase?.auth) {
+        showError("Authentication service could not be initialized. Check the Supabase configuration and network connection.");
+        submit.disabled = true;
+        return;
+      }
+
       function openPortal(role) {
-        const portal = role === "manager" ? "manager_IPT.html" : "emp_IPT.html";
+        const portal = role === "manager" ? "manager_IPT%20(1).html" : "emp_IPT%20(1).html";
         window.location.replace(`./${portal}`);
       }
 
@@ -127,7 +133,7 @@
         showError("");
         try {
           const { data, error } = await window.orbitSupabase.auth.signInWithPassword({
-            email: window.orbitUsernameEmail(document.querySelector("#username").value),
+            email: document.querySelector("#email").value.trim(),
             password: document.querySelector("#password").value
           });
           if (error) throw error;
