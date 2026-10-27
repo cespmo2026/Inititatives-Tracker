@@ -67,7 +67,7 @@
     <p class="help">Sign in with your organization email and password. Your account role determines which portal opens.</p>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./supabase.js"></script>
+  <script src="./supabase-config.js"></script>
   <script>
     (() => {
       "use strict";
@@ -87,7 +87,7 @@
       }
 
       function openPortal(role) {
-        const portal = role === "manager" ? "manager_IPT%20(1).html" : "emp_IPT%20(1).html";
+        const portal = role === "manager" ? "manager_IPT.html" : "emp_IPT.html";
         window.location.replace(`./${portal}`);
       }
 
