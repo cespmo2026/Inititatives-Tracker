@@ -43,6 +43,16 @@
     .nav-icon { width: 19px; text-align: center; font-size: 16px; }
     .nav-count { margin-left: auto; font-size: 11px; color: #9eacb7; }
     .sidebar-bottom { margin-top: auto; }
+    .sidebar-illustration {
+      display: block;
+      width: 100%;
+      height: clamp(165px, 30vh, 230px);
+      flex: 0 0 auto;
+      margin-top: auto;
+      object-fit: contain;
+      object-position: center bottom;
+      pointer-events: none;
+    }
     .privacy-note { margin: 20px 7px; padding: 13px; background: #263b4e; border: 1px solid #354a5b; border-radius: 11px; }
     .privacy-note strong { display: block; margin-bottom: 5px; font-size: 11px; }
     .privacy-note p { margin: 0; color: #b7c1c9; font-size: 11px; line-height: 1.55; }
@@ -55,6 +65,9 @@
     .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 29px; }
     .breadcrumb { color: var(--muted); font-size: 12px; }
     .breadcrumb b { color: var(--ink); font-weight: 650; }
+    .breadcrumb button, .detail-breadcrumb button { padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+    .breadcrumb button:hover, .detail-breadcrumb button:hover { text-decoration: underline; }
+    .breadcrumb button:focus-visible, .detail-breadcrumb button:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 2px; }
     .top-actions { display: flex; gap: 10px; align-items: center; }
     .greeting { margin-bottom: 23px; }
     h1 { margin: 0; font-size: clamp(25px, 3vw, 31px); line-height: 1.2; letter-spacing: -1.1px; }
@@ -76,11 +89,25 @@
     .project-card-description { display: -webkit-box; overflow: hidden; margin: 10px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
     .detail-project-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
     .detail-project-heading h2 { min-width: 0; }
+    .deployed-project-link { color: #26734d; font-size: 11px; font-weight: 650; text-decoration: underline; text-underline-offset: 2px; }
+    .deployed-project-link:hover { color: #145b3b; }
+    .deployed-project-link:focus-visible { outline: 2px solid #6eb887; outline-offset: 3px; }
     .project-status-select { width: auto; min-width: 132px; min-height: 34px; padding: 6px 30px 6px 10px; border: 1px solid #a9d3b4; border-radius: 9px; background: #f3fbf4; color: #175b3b; font-size: 11px; font-weight: 650; }
-    .project-progress-editor { display: flex; align-items: center; gap: 6px; }
-    .project-progress-editor input { width: 74px; min-height: 32px; padding: 4px 6px; text-align: right; }
-    .project-progress-editor .primary-button { min-height: 32px; padding: 6px 10px; font-size: 10px; }
-    .project-progress-editor .progress-suffix { color: var(--ink); font-size: 11px; font-weight: 700; }
+    .project-progress-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .project-progress-track { position: relative; flex: 0 0 50%; min-width: 150px; height: 10px; overflow: visible; border-radius: 999px; background: #e2efe4; }
+    .project-progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg,#24734d,#72bc88); transition: width .15s ease; }
+    .project-progress-range { position: absolute; inset: -5px 0; width: 100%; height: 20px; margin: 0; appearance: none; background: transparent!important; border: 0!important; outline: 0!important; cursor: ew-resize; }
+    .project-progress-range:disabled { display: none; }
+    .project-progress-range::-webkit-slider-runnable-track { height: 10px; background: transparent; }
+    .project-progress-range::-moz-range-track { height: 10px; background: transparent; }
+    .project-progress-range::-webkit-slider-thumb { width: 18px; height: 18px; margin-top: -4px; appearance: none; border: 3px solid #fff; border-radius: 50%; background: #17613f; box-shadow: 0 1px 5px rgba(20,75,46,.3); }
+    .project-progress-range::-moz-range-thumb { width: 13px; height: 13px; border: 3px solid #fff; border-radius: 50%; background: #17613f; box-shadow: 0 1px 5px rgba(20,75,46,.3); }
+    .project-progress-range:focus-visible::-webkit-slider-thumb { outline: 3px solid rgba(76,155,101,.35); }
+    .project-progress-range:focus-visible::-moz-range-thumb { outline: 3px solid rgba(76,155,101,.35); }
+    .project-progress-range:focus-visible { outline: 3px solid rgba(76,155,101,.2)!important; outline-offset: 3px; }
+    .project-progress-edit,.project-progress-save { min-height: 32px; padding: 6px 10px; font-size: 10px; }
+    .project-progress-save[hidden] { display: none!important; }
+    .project-status-select:disabled { cursor: default; opacity: 1; }
     .project-tracking-message { margin: 7px 0 0; color: var(--red); font-size: 10px; }
     .project-tracking-message:empty { display: none; }
     .release-links { display: grid; gap: 9px; }
@@ -164,6 +191,23 @@
     .due-label { flex: 0 0 auto; color: var(--muted); font-size: 10px; text-align: right; }
     .due-label strong { display: block; margin-top: 5px; color: var(--ink); font-size: 11px; }
     .detail-content { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(200px, .8fr); gap: 20px; }
+    .project-overview-layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(220px, .8fr); align-items: start; gap: 18px; }
+    .project-overview-card { min-width: 0; padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .project-overview-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .project-overview-heading h3 { margin: 0; font-size: 14px; }
+    .project-overview-description { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .project-info-list { display: grid; }
+    .project-info-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+    .project-info-row:last-child { border-bottom: 0; }
+    .project-info-row strong { color: var(--ink); text-align: right; }
+    .project-team-list { display: grid; gap: 9px; }
+    .project-team-member { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .project-team-member .avatar { width: 35px; height: 35px; font-size: 11px; }
+    .project-team-member-copy { min-width: 0; }
+    .project-team-member-name { font-size: 11px; font-weight: 700; }
+    .project-team-member-role { margin-top: 3px; color: var(--muted); font-size: 10px; }
+    .detail-breadcrumb { margin-bottom: 10px; color: var(--muted); font-size: 11px; }
+    .detail-breadcrumb b { color: var(--ink); font-weight: 700; }
     .subsection { margin-bottom: 22px; }
     .subsection:last-child { margin-bottom: 0; }
     .subsection-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -245,6 +289,7 @@
     @media (max-width: 1080px) {
       main { padding: 27px 23px 40px; }
       .detail-content { grid-template-columns: 1fr; }
+      .project-overview-layout { grid-template-columns: 1fr; }
       .timesheet-layout { grid-template-columns: 1fr; }
     }
     @media (max-width: 780px) {
@@ -492,7 +537,182 @@ hr,.divider { border-color:#d8ebdc!important; }
 @media(max-width:620px) { main { padding:15px 12px 28px!important; } main:before { height:170px; margin-bottom:16px; background-position:58% center; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important;animation:none!important;scroll-behavior:auto!important; } }
 
-
+/* Employee project-list cards only; keep project detail and other sections unchanged. */
+body:has(#projects-view:not([hidden])) #projects-view #project-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  gap: 16px !important;
+}
+#projects-view #project-list .project-card {
+  display: flex;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  min-height: 192px !important;
+  gap: 13px;
+  padding: 17px !important;
+  border: 1px solid #d5e9dd !important;
+  border-radius: 15px !important;
+  background: rgba(255,255,255,.96) !important;
+  color: #174b3c !important;
+  box-shadow: 0 5px 16px rgba(37,91,64,.06) !important;
+  text-align: left;
+  backdrop-filter: none;
+}
+#projects-view #project-list .project-card:before {
+  display: none !important;
+}
+#projects-view #project-list .project-card:hover {
+  transform: translateY(-2px) !important;
+  border-color: #a9d2b8 !important;
+  background: #fff !important;
+  box-shadow: 0 10px 24px rgba(37,91,64,.11) !important;
+}
+#projects-view #project-list .employee-project-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+#projects-view #project-list .employee-project-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+}
+#projects-view #project-list .employee-project-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+}
+#projects-view #project-list .employee-project-icon svg {
+  width: 20px;
+  height: 20px;
+}
+#projects-view #project-list .employee-project-icon.kpi { background: #438ce8; }
+#projects-view #project-list .employee-project-icon.operations { background: #159b7b; }
+#projects-view #project-list .employee-project-icon.document { background: #dfa91a; }
+#projects-view #project-list .employee-project-icon.ipt { background: #7653df; }
+#projects-view #project-list .employee-project-icon.learning { background: #19a99d; }
+#projects-view #project-list .employee-project-icon.design { background: #7653df; }
+#projects-view #project-list .employee-project-icon.general { background: #3b9b70; }
+#projects-view #project-list .employee-project-name-group {
+  display: block;
+  min-width: 0;
+}
+#projects-view #project-list .project-name {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #174b3c !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  line-height: 1.35;
+}
+#projects-view #project-list .employee-project-client {
+  display: block;
+  overflow: hidden;
+  margin-top: 4px;
+  color: #718b7c;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#projects-view #project-list .employee-project-status {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+#projects-view #project-list .employee-project-status.on-track {
+  background: #e3f3e6;
+  color: #245f40;
+}
+#projects-view #project-list .employee-project-status.at-risk {
+  background: #fff0cf;
+  color: #88621e;
+}
+#projects-view #project-list .employee-project-status.blocked {
+  background: #fbe3dc;
+  color: #9d4438;
+}
+#projects-view #project-list .employee-project-status.completed {
+  background: #eff2f5;
+  color: #66738c;
+}
+#projects-view #project-list .project-card-description {
+  display: -webkit-box;
+  min-height: 31px;
+  overflow: hidden;
+  margin: 0;
+  color: #668273 !important;
+  font-size: 10px;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+#projects-view #project-list .employee-project-progress {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+#projects-view #project-list .employee-project-progress .progress-track {
+  height: 6px;
+  background: #dcefe4 !important;
+}
+#projects-view #project-list .employee-project-progress .progress-fill {
+  background: linear-gradient(90deg,#12634e,#46b881) !important;
+}
+#projects-view #project-list .employee-project-progress-value {
+  color: #648574;
+  font-size: 10px;
+  font-weight: 700;
+}
+#projects-view #project-list .employee-project-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 9px;
+  border-top: 1px solid #edf4ef;
+  color: #718b7c;
+  font-size: 9px;
+}
+#projects-view #project-list .employee-project-footer svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  color: #318b70;
+}
+@media (max-width: 1050px) {
+  body:has(#projects-view:not([hidden])) #projects-view #project-list {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  }
+}
+@media (min-width: 1051px) {
+  body:has(#projects-view:not([hidden])) #projects-view #project-list {
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+  }
+}
+@media (max-width: 780px) {
+  body:has(#projects-view:not([hidden])) #projects-view #project-list {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 620px) {
+  #projects-view #project-list {
+    grid-template-columns: 1fr !important;
+  }
+  #projects-view #project-list .project-card {
+    min-height: 178px !important;
+  }
+}
 
 /* Orbit Employee Portal — complete green workspace refinement */
 :root {
@@ -1137,9 +1357,18 @@ input:focus,select:focus,textarea:focus,.control:focus { outline:none !important
 :root{--orbit-forest:#124a32;--orbit-deep:#0b3525;--orbit-green:#28794d;--orbit-leaf:#49a66a;--orbit-mint:#d9f1df;--orbit-pale:#edf8ef;--orbit-line:#cce5d2;--orbit-text:#163f2d;--orbit-muted:#64816e}
 html{font-size:17px!important;background:#eaf6ec!important} body{background:radial-gradient(ellipse at 75% 0%,#ddf3e2 0%,#eaf6ec 44%,#e8f4e9 100%)!important;color:var(--orbit-text)!important;font-size:1rem!important}
 .app{background:transparent!important;min-height:100vh}
-.sidebar{background:linear-gradient(180deg,#124a32 0%,#0b3525 100%)!important;color:#f4fff5!important;border-right:1px solid #286a47!important;box-shadow:8px 0 28px rgba(12,60,35,.1)!important}
+.sidebar{position:relative;display:flex;flex-direction:column;background:linear-gradient(180deg,#124a32 0%,#0b3525 100%)!important;color:#f4fff5!important;border-right:1px solid #286a47!important;box-shadow:8px 0 28px rgba(12,60,35,.1)!important}
+.sidebar:before,.sidebar:after{display:none!important}
+.sidebar-illustration{position:relative;z-index:0}
 .brand,.brand-word{color:#f7fff8!important}.brand-mark{background:linear-gradient(145deg,#b9e8c3,#4aab6b)!important;color:#124a32!important;box-shadow:0 7px 18px #092e1f55!important}
-.nav-label{color:#9fd4ae!important;letter-spacing:.13em!important}.nav-button{color:#d5ebda!important;border:1px solid transparent!important;border-radius:12px!important;transition:all .18s ease}.nav-button:hover{background:#205a3a!important;color:#fff!important;transform:translateX(2px)}.nav-button.active{color:#12452e!important;background:linear-gradient(100deg,#c9efd2,#e9f9eb)!important;border-color:#b4dfbe!important;box-shadow:inset 3px 0 #54b776,0 5px 15px #082d1d22!important}.nav-icon{color:#8ed1a0!important}
+.nav-label{color:#9fd4ae!important;letter-spacing:.13em!important}
+.nav{position:relative!important;z-index:1;display:grid!important;grid-template-columns:1fr;gap:7px!important;width:100%!important}
+.nav-button{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;width:100%!important;min-height:48px!important;height:auto!important;padding:12px 13px!important;color:#d5ebda!important;border:1px solid transparent!important;border-radius:12px!important;font-size:13px!important;line-height:1.2!important;transition:all .18s ease}
+.nav-button:hover{background:#205a3a!important;color:#fff!important;transform:translateX(2px)}
+.nav-button.active{color:#12452e!important;background:linear-gradient(100deg,#c9efd2,#e9f9eb)!important;border-color:#b4dfbe!important;box-shadow:inset 3px 0 #54b776,0 5px 15px #082d1d22!important}
+.nav-icon{display:inline-grid!important;place-items:center!important;width:19px!important;flex:0 0 19px!important;color:#8ed1a0!important}
+.nav-text{display:block!important;visibility:visible!important;opacity:1!important;min-width:0}
+.sidebar-bottom{position:relative;z-index:1;flex:0 0 auto;margin-top:0!important}
 .profile{background:#194f35!important;border:1px solid #34724c!important;border-radius:15px!important}.profile-name{color:#fff!important}.profile-role,.privacy-note,.privacy-note p{color:#c5e4cd!important}.avatar{background:linear-gradient(145deg,#d7f1dd,#94d1a5)!important;color:#165d39!important;border:2px solid #f4fff6!important}
 main{background:transparent!important;color:var(--orbit-text)!important;padding-bottom:36px!important}.topbar{border-bottom:1px solid #c7e3ce!important;padding-bottom:15px!important}.breadcrumb{color:#64816e!important}.breadcrumb b{color:#174b31!important}
 .employee-visual-hero{display:grid!important;grid-template-columns:minmax(250px,.9fr) minmax(320px,1.35fr) minmax(110px,.35fr)!important;align-items:center!important;gap:12px!important;min-height:220px!important;margin:18px 0 22px!important;padding:22px 20px 20px 26px!important;overflow:hidden!important;position:relative!important;border:1px solid #c7e3ce!important;border-radius:22px!important;background:linear-gradient(105deg,#f5fff6 0%,#dff4e4 58%,#c7e9d0 100%)!important;box-shadow:0 14px 34px rgba(22,91,52,.09)!important}
@@ -1476,6 +1705,27 @@ body,main{background:radial-gradient(ellipse at 75% 0%,#d9f0dd 0%,#f1f8f1 44%,#e
 .nav-button{font-family:inherit!important;font-size:13px!important;font-weight:600!important}
 @media(max-width:760px){.nav-button{font-size:12px!important}}
 .nav-icon{color:#82c596!important}
+@media(min-width:781px){.app{grid-template-columns:clamp(224px,18.8vw,280px) minmax(0,1fr)!important}}
+@media(max-width:780px){
+  .app{grid-template-columns:clamp(200px,32vw,240px) minmax(0,1fr)!important}
+  .sidebar{position:relative!important;top:auto!important;height:auto!important;min-height:100vh!important;align-items:stretch!important;padding:18px 14px!important;overflow:visible!important}
+  .brand{margin-bottom:20px!important}
+  .nav-label,.sidebar-bottom{display:block!important}
+  .profile{justify-content:flex-start!important;padding:13px 8px 0!important}
+  .profile-copy{display:block!important}
+  .nav{grid-template-columns:1fr!important}
+  .nav-button{justify-content:flex-start!important;padding:11px 10px!important;font-size:12px!important}
+  .sidebar-illustration{height:clamp(120px,24vh,175px)}
+  body:has(#projects-view:not([hidden])) main{max-width:none!important;margin:0!important;background:url("./employee-projects-bg.png") right center / max(123.2%, 177.6vh) auto no-repeat!important}
+}
+@media(max-width:620px){
+  .app{grid-template-columns:minmax(0,1fr)!important}
+  .sidebar{display:flex!important;min-height:0!important;padding:15px!important}
+  .brand{margin-bottom:14px!important}
+  .nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .sidebar-illustration{height:clamp(115px,30vw,155px)}
+  .sidebar-bottom{margin-top:10px!important}
+}
 .privacy-note{background:rgba(255,255,255,.09)!important;border-color:rgba(197,230,202,.2)!important;color:#e3f3e6!important;box-shadow:0 7px 18px rgba(16,60,43,.06)!important}
 .privacy-note strong,.profile-name{color:#f7fff8!important}.privacy-note p,.profile-role{color:#c6e6cc!important}
 .profile{background:#1d6844!important;border-color:#357b55!important;border-top-color:#357b55!important}
@@ -1537,10 +1787,10 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
 ::-webkit-scrollbar-thumb{background:#8fcda0!important}
 ::-webkit-scrollbar-thumb:hover{background:#55a975!important}
 ::selection{background:#d9f0dd!important;color:#173d2d!important}
-#project-detail-modal.modal-backdrop.open{display:block!important;position:fixed!important;left:var(--detail-left,224px)!important;top:var(--detail-top,0px)!important;right:0!important;bottom:0!important;z-index:20!important;padding:0!important;overflow:hidden!important;background:#f1f8f1!important}
-#project-detail-modal .project-detail-dialog{display:flex!important;flex-direction:column!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:100%!important;overflow:hidden!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-#project-detail-modal #detail-panel{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;border:0!important;border-radius:0!important}
-#project-detail-modal .detail-header{position:sticky;top:0;z-index:2;padding-right:98px!important}
+#project-detail-modal.modal-backdrop.open{display:block!important;position:fixed!important;left:var(--detail-left,224px)!important;top:var(--detail-top,0px)!important;right:0!important;bottom:0!important;z-index:20!important;padding:0!important;overflow:hidden!important;background:#f1f8f1 url("./employee-projects-bg.png") right center / max(123.2%, 177.6vh) auto no-repeat!important}
+#project-detail-modal .project-detail-dialog{display:flex!important;flex-direction:column!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;min-height:100%!important;overflow:hidden!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+#project-detail-modal #detail-panel{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;border:0!important;border-radius:0!important;background:transparent!important}
+#project-detail-modal .detail-header{position:sticky;top:0;z-index:2;padding-right:98px!important;background:rgba(248,255,249,.9)!important;backdrop-filter:blur(4px)}
 #project-detail-modal .detail-close{position:absolute!important;top:12px!important;right:48px!important}
 @media(max-width:620px){body.project-detail-open .sidebar{display:flex!important}body.project-detail-open .app{grid-template-columns:1fr!important}body.project-detail-open #project-detail-modal .detail-header{padding-right:98px!important}}
 #project-detail-modal .detail-tab{font-size:12px!important}
@@ -1564,13 +1814,173 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
 #project-detail-modal .primary-button{font-size:13px!important}
 .brand-word{max-width:145px;font-size:13px!important;line-height:1.2;letter-spacing:-.2px!important}
 
+    .sidebar{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain}
+    @media(min-width:761px){.sidebar{position:sticky!important;top:0;height:100vh;min-height:0}.sidebar-bottom{flex:0 0 auto}}
+    .brand-logo{background:transparent!important;padding:0!important;border-radius:0!important;filter:drop-shadow(0 0 4px rgba(203,239,211,.7))}
+    .topbar{padding-bottom:6px!important;margin-bottom:14px!important}
+    .account-menu{position:relative;z-index:20}
+    .account-toggle{display:grid!important;place-items:center!important;width:auto!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:inherit!important;box-shadow:none!important}
+    .account-toggle:focus-visible{outline:3px solid #7bc492;outline-offset:3px}
+    .account-avatar{border:0!important;cursor:pointer}
+    #employee-account-toggle{display:grid!important;width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;box-shadow:none!important}
+    #employee-top-avatar{display:grid!important;place-items:center!important;width:35px!important;height:35px!important;min-width:35px!important;min-height:35px!important;padding:0!important;border:0!important;border-radius:50%!important;background:#a8d5b2!important;box-shadow:none!important;line-height:1!important}
+    .account-menu-panel{position:absolute;top:calc(100% + 10px);right:0;z-index:30;width:220px;padding:8px;border:1px solid #cfe5d5;border-radius:13px;background:#fbfefb;box-shadow:0 12px 30px rgba(26,83,54,.18);color:#173f30}
+    .account-menu-panel[hidden]{display:none!important}
+    .account-menu-profile{display:grid;gap:4px;padding:9px 10px 12px}
+    .account-menu-title{color:#668273;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
+    .account-menu-profile strong{font-size:13px}
+    .account-menu-role{color:#668273;font-size:11px}
+    .account-signout{width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;color:#a3483f;text-align:left;font-size:12px;font-weight:650}
+    .account-signout:hover{background:#f8e9e6}
+    .account-signout:disabled{opacity:.6;cursor:wait}
+    .project-overview-card{background:linear-gradient(145deg,#fcfffc,#f1f8f1)!important;border-color:#d6e8d9!important;box-shadow:0 8px 22px rgba(25,83,52,.055)}
+    .project-overview-heading h3,.project-team-member-name{color:#245f40}
+    .project-info-row{border-color:#d6e8d9}
+    .project-info-row strong{color:#173d2d}
+    .project-team-member{background:#fbfffb;border-color:#d6e8d9}
+    .project-team-member-role{color:#617d6c}
+    .detail-breadcrumb{color:#617d6c}
+    .detail-breadcrumb b{color:#173d2d}
+    #employee-account-menu .account-signout{display:flex!important;align-items:center!important;width:100%!important;min-height:38px!important;padding:9px 12px!important;border:1px solid #efd0cb!important;border-radius:10px!important;background:#fff8f7!important;color:#a3483f!important;text-align:left!important;font-size:12px!important;font-weight:650!important}
+    #employee-account-menu .account-signout:hover{border-color:#e7b8b1!important;background:#f8e9e6!important;color:#963c34!important}
+    #employee-account-menu .account-signout:focus-visible{outline:2px solid #c66b4e!important;outline-offset:2px}
+    #employee-account-menu .account-signout:disabled{opacity:.6!important;cursor:wait!important}
+    
+/* =========================================
+   MY PROJECTS PAGE - ILLUSTRATED UI DESIGN
+   ========================================= */
+
+@media (min-width: 781px) {
+
+/* Use the supplied cover image on the main content only. */
+body:has(#projects-view:not([hidden])) main {
+ max-width: none !important;
+ width: 100% !important;
+ min-height: 100vh;
+ margin: 0 !important;
+ padding: 30px 36px 45px !important;
+ background: url("./employee-projects-bg.png") right center / max(123.2%, 177.6vh) auto no-repeat !important;
+}
+
+body:has(#projects-view:not([hidden])) .topbar {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(40, 120, 75, 0.18);
+  padding-bottom: 15px;
+}
+
+/* My Projects heading */
+body:has(#projects-view:not([hidden])) #projects-view {
+  background: transparent !important;
+  min-height: calc(100vh - 110px);
+  position: relative;
+  z-index: 1;
+}
+
+body:has(#projects-view:not([hidden])) #projects-view .section-heading {
+  margin-bottom: 20px !important;
+}
+
+body:has(#projects-view:not([hidden])) #projects-view .section-heading h1 {
+  color: #10472e !important;
+  font-size: 28px !important;
+  font-weight: 750;
+}
+
+body:has(#projects-view:not([hidden])) #projects-view .section-heading p {
+  color: #397653 !important;
+  font-size: 14px !important;
+}
+
+/* Project cards */
+body:has(#projects-view:not([hidden])) #project-list {
+  grid-template-columns: repeat(auto-fill, minmax(310px, 373px)) !important;
+  gap: 20px !important;
+}
+
+body:has(#projects-view:not([hidden])) .project-card {
+  width: 100% !important;
+  max-width: 373px !important;
+  min-height: 190px !important;
+  padding: 23px !important;
+  background: rgba(246, 255, 248, 0.90) !important;
+  border: 1px solid #c5e5ce !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 25px rgba(25, 95, 52, 0.09) !important;
+  backdrop-filter: blur(4px);
+}
+
+body:has(#projects-view:not([hidden])) .project-card:before {
+  background: linear-gradient(
+    90deg, #17633f, #70c58b, #c5ebce
+  ) !important;
+}
+
+body:has(#projects-view:not([hidden])) .project-name {
+  color: #145233 !important;
+  font-size: 16px !important;
+}
+
+body:has(#projects-view:not([hidden])) .project-card-description {
+  color: #60836a !important;
+}
+
+body:has(#projects-view:not([hidden])) .progress-track {
+  background: #dcefe0 !important;
+}
+
+body:has(#projects-view:not([hidden])) .progress-fill {
+  background: linear-gradient(90deg, #207448, #78c58e) !important;
+}
+}
+
+/* SUBTLE LIGHT SWEEP ON EXISTING CES LOGO */
+.sidebar .brand {
+  position: relative !important;
+  isolation: isolate;
+}
+
+.sidebar .brand::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10px;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    rgba(255,255,255,.12) 38%,
+    rgba(255,255,255,.8) 50%,
+    rgba(255,255,255,.12) 62%,
+    transparent 75%
+  );
+  transform: translateX(-55px) skewX(-20deg);
+  animation: cesLogoLightSweep 4s ease-in-out infinite;
+}
+
+@keyframes cesLogoLightSweep {
+  0%, 65% {
+    transform: translateX(-55px) skewX(-20deg);
+    opacity: 0;
+  }
+  72% {
+    opacity: 1;
+  }
+  90%, 100% {
+    transform: translateX(55px) skewX(-20deg);
+    opacity: 0;
+  }
+}
+
 </style>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar">
       <div class="brand" aria-label="Internal Project Tracker home">
-        <svg class="brand-logo" viewBox="0 0 225 225" role="img" aria-label="CES logo"><path fill="#00528b" d="M48 61 181 28c15-4 28 7 34 20 4 10 1 20-4 31l-42 83c-9 18-26 30-47 25l-91-20c-22-5-27-20-23-39l10-42c4-16 14-22 30-25Z"/><text x="42" y="143" fill="#fff" font-family="Arial,sans-serif" font-size="68" font-weight="700" letter-spacing="-4">CES</text><path fill="#f7941d" d="M99 149h28v8H99z"/></svg><span class="brand-word">Internal Project Tracker</span>
+        <img class="brand-logo" src="./ces_logo.png" alt="CES logo"><span class="brand-word">Internal Project Tracker</span>
       </div>
       <p class="nav-label">WORKSPACE</p>
       <nav class="nav" aria-label="Workspace navigation">
@@ -1587,11 +1997,8 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           <span class="nav-icon" aria-hidden="true">◷</span><span class="nav-text">Timesheets</span>
         </button>
       </nav>
+      <img class="sidebar-illustration" src="./employee-sidebar-illustration.png" alt="" aria-hidden="true">
       <div class="sidebar-bottom">
-        <div class="privacy-note">
-          <strong>🔒 Your workspace is private</strong>
-          <p>Only projects assigned to you are shown here. Your updates are shared with your manager.</p>
-        </div>
         <div class="profile">
           <div class="avatar" id="employee-sidebar-avatar" aria-hidden="true">E</div>
           <div class="profile-copy"><div class="profile-name" id="employee-profile-name">Employee</div><div class="profile-role">Employee</div></div>
@@ -1601,9 +2008,21 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
 
     <main class="overview-active">
       <header class="topbar">
-        <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <b id="breadcrumb-label">Overview</b></div>
+        <div class="breadcrumb"><button id="breadcrumb-workspace" type="button">Workspace</button> <span aria-hidden="true">/</span> <button id="breadcrumb-label" type="button" aria-current="page">Overview</button><span id="breadcrumb-project-separator" aria-hidden="true" hidden> / </span><b id="breadcrumb-project-name" hidden></b></div>
         <div class="top-actions">
-          <div class="avatar" id="employee-top-avatar" aria-label="Employee">E</div>
+          <div class="account-menu">
+            <button class="account-toggle" id="employee-account-toggle" type="button" aria-label="Open account menu" aria-expanded="false" aria-controls="employee-account-menu">
+              <span class="avatar account-avatar" id="employee-top-avatar" aria-hidden="true">E</span>
+            </button>
+            <div class="account-menu-panel" id="employee-account-menu" aria-label="Account options" hidden>
+              <div class="account-menu-profile">
+                <span class="account-menu-title">Profile</span>
+                <strong id="employee-menu-name">Employee</strong>
+                <span class="account-menu-role">Employee</span>
+              </div>
+              <button class="account-signout" id="employee-account-signout" type="button">Sign out</button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -1686,6 +2105,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       "use strict";
 
       let employeeId = "";
+      let employeeProfile = null;
       const PROJECT_CARD_COPY = {
         "atlas-redesign": { name: "LMS", description: "Build a central learning platform for courses, training materials, and employee progress." },
         onboarding: { name: "KPI Tracker", description: "Track team goals and key performance indicators through clear, up-to-date metrics." },
@@ -1782,19 +2202,34 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       const submittedDateTimeLabel = (timestamp) => timestamp ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(timestamp)) : "Date and time unavailable";
       const badgeLabel = (status) => ({ "on-track": "On track", "at-risk": "At risk", blocked: "Blocked", completed: "Completed" })[status] || status;
       const getProject = (id) => projects.find((project) => project.id === id &&  isAssigned(project));
+      function getDeployedProjectUrl(project) {
+        const links=project.releases||[];
+        const ordered=[...links].sort((a,b)=>Number(/production|deploy|live|preview/i.test(b.title))-Number(/production|deploy|live|preview/i.test(a.title)));
+        for(const link of ordered) {
+          try {
+            const url=new URL(link.url);
+            if(url.protocol==="http:"||url.protocol==="https:")return url.href;
+          } catch(error) {
+            console.warn("Skipping invalid project deployment URL:",error);
+          }
+        }
+        return "";
+      }
       let updates = [];
       let timesheets = [];
       let releases = [];
       let releaseLoadError = null;
+      let projectTeamMembers = new Map();
+      let projectTeamLoadError = null;
       const isAssigned = (project) => project.employeeId === employeeId || (Array.isArray(project.employeeIds) && project.employeeIds.includes(employeeId));
 
       async function loadPortalData(user) {
         const db=window.orbitSupabase;
         const {data:members,error:memberError}=await db.from("project_members")
-          .select("project_id,project_role,allocation_pct").eq("employee_id",user.id);
+          .select("project_id").eq("employee_id",user.id);
         if(memberError)throw memberError;
         const projectIds=(members||[]).map((member)=>member.project_id);
-        if(!projectIds.length){projects=[];updates=[];timesheets=[];releases=[];releaseLoadError=null;selectedId="";return;}
+        if(!projectIds.length){projects=[];updates=[];timesheets=[];releases=[];releaseLoadError=null;projectTeamMembers=new Map();projectTeamLoadError=null;selectedId="";return;}
         const results=await Promise.all([
           db.from("projects").select("*").in("id",projectIds),
           db.from("project_milestones").select("*").in("project_id",projectIds).order("sort_order"),
@@ -1806,6 +2241,21 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const failed=results.find((result)=>result.error);
         if(failed?.error)throw failed.error;
         const [projectRows,milestoneRows,milestoneFeedbackRows,updateRows,timesheetRows,trackingRows]=results.map((result)=>result.data||[]);
+        projectTeamMembers=new Map();
+        projectTeamLoadError=null;
+        const {data:teamRows,error:teamError}=await db.rpc("get_employee_project_team",{
+          p_project_ids:projectIds
+        });
+        if(teamError) {
+          projectTeamLoadError=teamError;
+          console.error("Could not load project team assignments:",teamError);
+        } else {
+          for(const member of teamRows||[]) {
+            const assigned=projectTeamMembers.get(member.project_id)||[];
+            assigned.push({id:member.employee_id,name:member.display_name});
+            projectTeamMembers.set(member.project_id,assigned);
+          }
+        }
         const trackingByProject=new Map(trackingRows.map((item)=>[item.project_id,item]));
         const milestoneFeedbackById=new Map(milestoneFeedbackRows.map((item)=>[item.milestone_id,{
           text:item.feedback_text,date:item.updated_at
@@ -1857,6 +2307,31 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         clearTimeout(toastTimer);
         toastTimer = setTimeout(() => { toast.hidden = true; }, 3600);
       }
+      function setupAccountMenu() {
+        const toggle=$("#employee-account-toggle");
+        const menu=$("#employee-account-menu");
+        const closeMenu=()=>{menu.hidden=true;toggle.setAttribute("aria-expanded","false");};
+        toggle.addEventListener("click",()=>{
+          menu.hidden=!menu.hidden;
+          toggle.setAttribute("aria-expanded",String(!menu.hidden));
+        });
+        document.addEventListener("pointerdown",(event)=>{
+          if(!menu.parentElement.contains(event.target))closeMenu();
+        });
+        document.addEventListener("keydown",(event)=>{if(event.key==="Escape")closeMenu();});
+        $("#employee-account-signout").addEventListener("click",async(event)=>{
+          const button=event.currentTarget;
+          button.disabled=true;
+          try {
+            const {error}=await window.orbitSupabase.auth.signOut();
+            if(error)throw error;
+          } catch(error) {
+            console.error("Employee sign out failed:",error);
+            showToast(`Sign out failed: ${error.message}`);
+            button.disabled=false;
+          }
+        });
+      }
 
       function renderStats() {
         const active = projects.filter((project) => project.status !== "completed").length;
@@ -1871,15 +2346,53 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         $("#month-stat").textContent = monthUpdates;
       }
 
+      function employeeProjectVisual(project) {
+        const label = `${project.name} ${project.client || ""}`.toLowerCase();
+        if (label.includes("ipt") || label.includes("internal project tracker")) {
+          return { tone: "ipt", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 8 9 5 9-5m-18 0v9l9 5 9-5V8m-9 5v9"/></svg>' };
+        }
+        if (label.includes("kpi") || label.includes("tracker")) {
+          return { tone: "kpi", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5m0 14h16"/><path d="M8 15v-4m4 4V7m4 8v-6"/></svg>' };
+        }
+        if (label.includes("pm operations") || label.includes("project management") || label.includes("operations")) {
+          return { tone: "operations", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 19v-1a6 6 0 0 1 12 0v1z"/><path d="M16 5.5a3 3 0 0 1 0 5.8m2 2.2a5 5 0 0 1 3 4.5v1h-3"/></svg>' };
+        }
+        if (label.includes("sow") || label.includes("statement of work") || label.includes("document")) {
+          return { tone: "document", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v6h5M9 13h7m-7 4h7"/></svg>' };
+        }
+        if (label.includes("lms") || label.includes("learning") || label.includes("course")) {
+          return { tone: "learning", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4m-4-9 3-3 2 2 3-4"/></svg>' };
+        }
+        if (label.includes("design") || label.includes("ai") || label.includes("creative")) {
+          return { tone: "design", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg>' };
+        }
+        return { tone: "general", icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h6l2 2h8v12H4z"/><path d="m8 13 2.5 2.5L16 10"/></svg>' };
+      }
+
       function renderProjectList() {
         const assignedProjects = projects.filter(isAssigned);
-        $("#project-list").innerHTML = assignedProjects.length ? assignedProjects.map((project) => `
-          <button class="project-card" type="button" data-project-id="${esc(project.id)}" aria-label="Open ${esc(project.name)}, ${esc(project.progress)}% complete">
-            <div class="project-name">${esc(project.name)}</div>
-            <div class="progress-meta"><span>Progress</span><strong>${project.progress}%</strong></div>
-            <div class="progress-track" role="progressbar" aria-label="${esc(project.name)} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${esc(project.progress)}"><div class="progress-fill" style="width:${Math.max(0, Math.min(100, Number(project.progress) || 0))}%"></div></div>
+        $("#project-list").innerHTML = assignedProjects.length ? assignedProjects.map((project) => {
+          const progress = Number(project.progress) || 0;
+          const visual = employeeProjectVisual(project);
+          return `<button class="project-card" type="button" data-project-id="${esc(project.id)}" aria-label="Open ${esc(project.name)}, ${esc(progress)}% complete">
+            <div class="employee-project-card-top">
+              <span class="employee-project-identity">
+                <span class="employee-project-icon ${visual.tone}" aria-hidden="true">${visual.icon}</span>
+                <span class="employee-project-name-group">
+                  <span class="project-name">${esc(project.name)}</span>
+                  ${project.client ? `<span class="employee-project-client">${esc(project.client)}</span>` : ""}
+                </span>
+              </span>
+              <span class="employee-project-status ${esc(project.status)}">${esc(badgeLabel(project.status))}</span>
+            </div>
             <p class="project-card-description">${esc(project.description || "No project description provided.")}</p>
-          </button>`).join("") : '<div class="empty-state">No projects are assigned to you yet.</div>';
+            <div class="employee-project-progress">
+              <div class="progress-track" role="progressbar" aria-label="${esc(project.name)} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${esc(progress)}"><div class="progress-fill" style="width:${Math.max(0, Math.min(100, progress))}%"></div></div>
+              <span class="employee-project-progress-value">${esc(progress)}%</span>
+            </div>
+            <div class="employee-project-footer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Due ${esc(dateLabel(project.due))}</span></div>
+          </button>`;
+        }).join("") : '<div class="empty-state">No projects are assigned to you yet.</div>';
         $("#project-list").querySelectorAll("[data-project-id]").forEach((button) => {
           button.addEventListener("click", () => {
             selectedId = button.dataset.projectId;
@@ -1889,6 +2402,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
             $("#project-detail-modal").classList.add("open");
             $("#project-detail-modal").setAttribute("aria-hidden", "false");
             document.body.style.overflow = "hidden";
+            renderBreadcrumb();
           });
         });
       }
@@ -1898,6 +2412,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const project = getProject(selectedId);
         const panel = $("#detail-panel");
         if (!project) return;
+        const deployedProjectUrl=getDeployedProjectUrl(project);
         const savedDraft = options.submitted ? null : loadUpdateDraft(project);
         const milestones = project.milestones.map((milestone) => `
           <div class="milestone ${esc(milestone.state)}">
@@ -1909,36 +2424,76 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
             </div>
             <span class="milestone-date">${esc(milestone.date)}</span>
           </div>`).join("") || '<p class="muted">No milestones have been added yet.</p>';
+        const projectTeam=[...(projectTeamMembers.get(project.id)||[])];
+        if(employeeProfile&&!projectTeam.some((member)=>member.id===employeeId)) {
+          projectTeam.push({id:employeeId,name:employeeProfile.display_name,role:employeeProfile.role||"Employee"});
+        }
+        const teamContent=projectTeamLoadError
+          ? `<div class="empty-state">Team assignments could not be loaded: ${esc(projectTeamLoadError.message)}</div>`
+          : projectTeam.length
+            ? projectTeam.map((member)=>{
+              const initials=member.name.split(/\s+/).map((part)=>part[0]).slice(0,2).join("").toUpperCase();
+              return `<div class="project-team-member"><span class="avatar" aria-hidden="true">${esc(initials)}</span><div class="project-team-member-copy"><div class="project-team-member-name">${esc(member.name)}</div></div></div>`;
+            }).join("")
+            : '<div class="empty-state">No team members are assigned to this project.</div>';
         panel.innerHTML = `
           <div class="detail-header">
+            <div class="detail-breadcrumb"><button type="button" data-breadcrumb-view="overview">Workspace</button> <span aria-hidden="true">/</span> <button type="button" data-breadcrumb-view="projects">My projects</button> <span aria-hidden="true">/</span> <b>${esc(project.name)}</b></div>
             <div class="detail-title-row">
-              <div><div class="eyebrow">${esc(project.client)}</div><div class="detail-project-heading"><h2 id="detail-project-name">${esc(project.name)}</h2><label class="sr-only" for="project-status-select">Project status</label><select class="project-status-select" id="project-status-select" aria-label="Project status"><option value="on-track" ${project.status === "on-track" ? "selected" : ""}>On track</option><option value="at-risk" ${project.status === "at-risk" ? "selected" : ""}>At risk</option><option value="blocked" ${project.status === "blocked" ? "selected" : ""}>Blocked</option></select></div><p class="detail-description">${esc(project.description)}</p></div>
+              <div class="detail-project-heading"><h2 id="detail-project-name">${esc(project.name)}</h2>${deployedProjectUrl?`<a class="deployed-project-link" href="${esc(deployedProjectUrl)}" target="_blank" rel="noopener noreferrer">Click here to view projects<span aria-hidden="true"> ↗</span></a>`:""}</div>
               <div class="due-label">Due date<strong>${esc(dateLabel(project.due))}</strong></div>
             </div>
-            <div class="progress-meta"><span>Overall progress</span><div class="project-progress-editor"><label class="sr-only" for="project-progress-input">Overall progress percent</label><input class="control" id="project-progress-input" type="number" min="0" max="100" step="1" value="${project.progress}" aria-label="Overall progress percentage"><span class="progress-suffix">%</span><button class="primary-button" id="save-project-progress" type="button">Save</button></div></div>
-            <div class="progress-track" id="project-progress-track" aria-label="Project ${esc(project.progress)}% complete"><div class="progress-fill" id="project-progress-fill" style="width:${project.progress}%"></div></div>
+            <div class="progress-meta"><span>Overall progress</span></div>
+            <div class="project-progress-controls">
+              <div class="project-progress-track" id="project-progress-track" role="progressbar" aria-label="Project progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${esc(project.progress)}">
+                <div class="project-progress-fill" id="project-progress-fill" style="width:${project.progress}%"></div>
+                <label class="sr-only" for="project-progress-input">Overall project progress percentage</label>
+                <input class="project-progress-range" id="project-progress-input" type="range" min="0" max="100" step="1" value="${esc(project.progress)}" aria-label="Overall project progress percentage" disabled>
+              </div>
+              <button class="secondary-button project-progress-edit" id="edit-project-progress" type="button">Edit</button>
+              <label class="sr-only" for="project-status-select">Project status</label>
+              <select class="project-status-select" id="project-status-select" aria-label="Project status" disabled><option value="on-track" ${project.status === "on-track" ? "selected" : ""}>On track</option><option value="at-risk" ${project.status === "at-risk" ? "selected" : ""}>At risk</option><option value="blocked" ${project.status === "blocked" ? "selected" : ""}>On hold</option><option value="completed" ${project.status === "completed" ? "selected" : ""}>Completed</option></select>
+              <button class="primary-button project-progress-save" id="save-project-progress" type="button" hidden>Save</button>
+            </div>
             <p class="project-tracking-message" id="project-tracking-message" role="status" aria-live="polite"></p>
           </div>
           <div class="detail-tabs" role="group" aria-label="Project sections">
             <button class="detail-tab active" type="button" data-project-tab="details" aria-pressed="true">Project details</button>
+            <button class="detail-tab" type="button" data-project-tab="milestones" aria-pressed="false">Milestones & feedback</button>
             <button class="detail-tab" type="button" data-project-tab="releases" aria-pressed="false">Research and Releases</button>
             <button class="detail-tab" type="button" data-project-tab="submit" aria-pressed="false">Share a weekly update</button>
           </div>
           <section class="detail-tab-panel" id="project-details-panel">
-            <div class="detail-content">
-              <div class="milestone-project-layout">
-                <section class="subsection milestone-list-column">
-                  <div class="subsection-head milestone-subsection-head"><h3>Milestones</h3><button class="primary-button milestone-add-action" id="add-milestone-toggle" type="button">Add milestone</button></div>
-                  <div class="milestones">${milestones}</div>
-                  <form class="milestone-form" id="milestone-form" hidden>
-                    <div class="form-field"><label for="milestone-name">Milestone name</label><input class="control" id="milestone-name" maxlength="100" required></div>
-                    <div class="form-field"><label for="milestone-date">Due date</label><input class="control" id="milestone-date" type="date" required></div>
-                    <button class="primary-button" type="submit">Save milestone</button>
-                    <p class="milestone-message" id="milestone-message" role="alert" aria-live="polite"></p>
-                  </form>
-                  ${project.blocker ? `<div class="blocker-note"><strong>Current blocker</strong>${esc(project.blocker)}</div>` : ""}
-                </section>
-              </div>
+            <div class="project-overview-layout">
+              <section class="project-overview-card">
+                <div class="project-overview-heading"><h3>Project overview</h3><span class="badge ${esc(project.status)}">${esc(badgeLabel(project.status))}</span></div>
+                <p class="project-overview-description">${esc(project.description||"No description provided.")}</p>
+                <div class="project-info-list">
+                  <div class="project-info-row"><span>Progress</span><strong>${esc(project.progress)}%</strong></div>
+                  <div class="project-info-row"><span>Due date</span><strong>${esc(dateLabel(project.due))}</strong></div>
+                  <div class="project-info-row"><span>Priority</span><strong>${esc(project.priority||"Medium")}</strong></div>
+                  <div class="project-info-row"><span>Department</span><strong>${esc(project.client||"Not set")}</strong></div>
+                </div>
+                ${project.blocker ? `<div class="blocker-note" style="margin-top:12px"><strong>Current blocker</strong>${esc(project.blocker)}</div>` : ""}
+              </section>
+              <section class="project-overview-card">
+                <div class="project-overview-heading"><h3>Team & resources</h3></div>
+                <div class="project-team-list">${teamContent}</div>
+              </section>
+            </div>
+          </section>
+          <section class="detail-tab-panel" id="project-milestones-panel" hidden>
+            <div class="milestone-project-layout">
+              <section class="subsection milestone-list-column">
+                <div class="subsection-head milestone-subsection-head"><h3>Milestones</h3><button class="primary-button milestone-add-action" id="add-milestone-toggle" type="button">Add milestone</button></div>
+                <div class="milestones">${milestones}</div>
+                <form class="milestone-form" id="milestone-form" hidden>
+                  <div class="form-field"><label for="milestone-name">Milestone name</label><input class="control" id="milestone-name" maxlength="100" required></div>
+                  <div class="form-field"><label for="milestone-date">Due date</label><input class="control" id="milestone-date" type="date" required></div>
+                  <button class="primary-button" type="submit">Save milestone</button>
+                  <p class="milestone-message" id="milestone-message" role="alert" aria-live="polite"></p>
+                </form>
+              </section>
             </div>
           </section>
           <section class="detail-tab-panel" id="project-releases-panel" hidden>
@@ -1992,13 +2547,38 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         });
         $("#milestone-form").addEventListener("submit", (event) => saveProjectMilestone(event, project));
         const progressInput = $("#project-progress-input");
+        const progressFill = $("#project-progress-fill");
+        const progressTrack = $("#project-progress-track");
+        const editProgressButton = $("#edit-project-progress");
+        const saveProgressButton = $("#save-project-progress");
+        const statusSelect = $("#project-status-select");
+        const setProgressEditing = (editing) => {
+          progressInput.disabled = !editing;
+          statusSelect.disabled = !editing;
+          saveProgressButton.hidden = !editing;
+          editProgressButton.textContent = editing ? "Cancel" : "Edit";
+          editProgressButton.setAttribute("aria-label", editing ? "Cancel progress edit" : "Edit project progress");
+        };
         progressInput.addEventListener("input", () => {
-          const progress = Math.max(0, Math.min(100, Number(progressInput.value) || 0));
-          $("#project-progress-fill").style.width = `${progress}%`;
-          $("#project-progress-track").setAttribute("aria-label", `Project ${progress}% complete`);
+          const progress = Number(progressInput.value);
+          progressFill.style.width = `${progress}%`;
+          progressTrack.setAttribute("aria-valuenow", String(progress));
+          progressTrack.setAttribute("aria-label", `Project ${progress}% complete`);
         });
-        $("#save-project-progress").addEventListener("click", () => saveProjectTracking(project));
-        $("#project-status-select").addEventListener("change", () => saveProjectTracking(project));
+        editProgressButton.addEventListener("click", () => {
+          if(!progressInput.disabled) {
+            progressInput.value = String(project.progress);
+            statusSelect.value = project.status;
+            progressFill.style.width = `${project.progress}%`;
+            progressTrack.setAttribute("aria-valuenow", String(project.progress));
+            progressTrack.setAttribute("aria-label", `Project ${project.progress}% complete`);
+            setProgressEditing(false);
+            return;
+          }
+          setProgressEditing(true);
+          progressInput.focus();
+        });
+        saveProgressButton.addEventListener("click", () => saveProjectTracking(project));
         const newUpdateButton = $("#new-weekly-update");
         if (newUpdateButton) {
           newUpdateButton.addEventListener("click", () => {
@@ -2167,6 +2747,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       function setProjectTab(tab) {
         const panels = {
           details: "#project-details-panel",
+          milestones: "#project-milestones-panel",
           releases: "#project-releases-panel",
           submit: "#project-submit-panel"
         };
@@ -2186,6 +2767,22 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         $("#project-detail-modal").setAttribute("aria-hidden", "true");
         document.body.classList.remove("project-detail-open");
         document.body.style.overflow = "";
+        renderBreadcrumb();
+      }
+
+      function renderBreadcrumb() {
+        const labels={overview:"Overview",projects:"My projects",updates:"My updates",timesheets:"Timesheets"};
+        $("#breadcrumb-label").textContent=labels[currentView]||"Overview";
+        const project=getProject(selectedId);
+        const showProject=currentView==="projects"&&$("#project-detail-modal").classList.contains("open")&&Boolean(project);
+        $("#breadcrumb-project-separator").hidden=!showProject;
+        $("#breadcrumb-project-name").hidden=!showProject;
+        $("#breadcrumb-project-name").textContent=showProject?project.name:"";
+      }
+
+      function navigateBreadcrumb(view) {
+        if(view==="projects")closeProjectDetail();
+        setView(view);
       }
 
       function updateDraftKey(project) {
@@ -2269,7 +2866,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           renderStats();
           renderProjectList();
           renderDetail();
-          setProjectTab("details");
+          setProjectTab("milestones");
           showToast("Milestone added.");
         } catch (error) {
           console.error("Milestone saved, but project data could not refresh:", error);
@@ -2283,14 +2880,18 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         const progress = Number($("#project-progress-input").value);
         const button = $("#save-project-progress");
         const statusSelect = $("#project-status-select");
+        const progressInput = $("#project-progress-input");
+        const editButton = $("#edit-project-progress");
         const message = $("#project-tracking-message");
-        if (!["on-track", "at-risk", "blocked"].includes(status) ||
+        if (!["on-track", "at-risk", "blocked", "completed"].includes(status) ||
             !Number.isInteger(progress) || progress < 0 || progress > 100) {
           message.textContent = "Choose a valid status and a progress value between 0% and 100%.";
           return;
         }
 
         button.disabled = true;
+        editButton.disabled = true;
+        progressInput.disabled = true;
         statusSelect.disabled = true;
         message.textContent = "";
         try {
@@ -2306,6 +2907,8 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           console.error("Could not save project status and progress:", error);
           message.textContent = `Project status and progress could not be saved: ${error.message}`;
           button.disabled = false;
+          editButton.disabled = false;
+          progressInput.disabled = false;
           statusSelect.disabled = false;
           return;
         }
@@ -2321,6 +2924,8 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           console.error("Project status and progress saved, but the project view could not refresh:", error);
           message.textContent = `Status and progress were saved, but the project view could not refresh: ${error.message}`;
           button.disabled = false;
+          editButton.disabled = false;
+          progressInput.disabled = false;
           statusSelect.disabled = false;
         }
       }
@@ -2531,16 +3136,23 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           $("#"+id).classList.toggle("active", active);
           $("#"+id).toggleAttribute("aria-current", active);
         });
-        $("#breadcrumb-label").textContent = ({ overview: "Overview", projects: "My projects", updates: "My updates", timesheets: "Timesheets" })[view];
+        renderBreadcrumb();
         if (view === "updates") renderUpdates();
         if (view === "timesheets") renderTimesheets();
       }
 
       $("#updates-filter").addEventListener("change", renderUpdates);
+      setupAccountMenu();
       $("#overview-nav").addEventListener("click", () => setView("overview"));
       $("#projects-nav").addEventListener("click", () => setView("projects"));
       $("#updates-nav").addEventListener("click", () => setView("updates"));
       $("#timesheets-nav").addEventListener("click", () => setView("timesheets"));
+      $("#breadcrumb-workspace").addEventListener("click", () => navigateBreadcrumb("overview"));
+      $("#breadcrumb-label").addEventListener("click", () => navigateBreadcrumb(currentView));
+      $("#detail-panel").addEventListener("click", (event) => {
+        const breadcrumb = event.target.closest("[data-breadcrumb-view]");
+        if (breadcrumb) navigateBreadcrumb(breadcrumb.dataset.breadcrumbView);
+      });
       $("#timesheet-date").value = localDateValue();
       $("#timesheet-date").max = localDateValue();
       $("#timesheet-date").addEventListener("change", renderTimesheets);
@@ -2558,11 +3170,13 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       window.orbitAuthenticate("employee",async(user,profile)=>{
         currentUser=user;
         employeeId=user.id;
-        const initials=profile.display_name.split(/\s+/).map((part)=>part[0]).slice(0,2).join("").toUpperCase();
+        employeeProfile=profile;
+        const initial=profile.display_name.trim().charAt(0).toUpperCase()||"E";
         $("#employee-profile-name").textContent=profile.display_name;
-        $("#employee-sidebar-avatar").textContent=initials;
-        $("#employee-top-avatar").textContent=initials;
-        $("#employee-top-avatar").setAttribute("aria-label",profile.display_name);
+        $("#employee-menu-name").textContent=profile.display_name;
+        $("#employee-sidebar-avatar").textContent=initial;
+        $("#employee-top-avatar").textContent=initial;
+        $("#employee-account-toggle").setAttribute("aria-label",`Account menu for ${profile.display_name}`);
         try {
           await loadPortalData(user);
           renderStats();renderProjectList();

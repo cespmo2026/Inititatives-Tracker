@@ -21,7 +21,6 @@
     #orbit-auth-gate input { width: 100%; padding: 11px; border: 1px solid #cfe3d3; border-radius: 9px; }
     #orbit-auth-gate button { width: 100%; margin-top: 16px; padding: 11px; border: 0; border-radius: 9px; background: #17633f; color: white; font-weight: 700; cursor: pointer; }
     #orbit-auth-error { min-height: 20px; margin-top: 12px !important; color: #a64435 !important; font-size: 13px; }
-    .orbit-signout { margin-left: 10px; padding: 8px 11px; border: 1px solid #cfe3d3; border-radius: 9px; background: white; color: #2b6846; cursor: pointer; }
   `;
   document.head.append(style);
 
@@ -55,22 +54,6 @@
       document.body.classList.add("orbit-authenticated");
       gate.hidden = true;
     };
-    const signout = document.createElement("button");
-    signout.type = "button";
-    signout.className = "orbit-signout";
-    signout.textContent = "Sign out";
-    signout.addEventListener("click", async () => {
-      try {
-        const { error } = await window.orbitSupabase.auth.signOut();
-        if (error) throw error;
-        showGate();
-      } catch (error) {
-        console.error("Supabase sign out failed:", error);
-        showGate(`Sign out failed: ${error.message}`);
-      }
-    });
-    document.querySelector(".top-actions")?.append(signout);
-
     const authenticateSession = async (session) => {
       if (!session?.user) {
         showGate();
@@ -78,7 +61,7 @@
       }
       const { data: profile, error } = await window.orbitSupabase
         .from("profiles")
-        .select("id,display_name,role,capacity_pct")
+        .select("id,display_name,role")
         .eq("id", session.user.id)
         .single();
       if (error) {
@@ -129,4 +112,3 @@
     }
   };
 })();
- 
