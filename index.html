@@ -212,6 +212,17 @@
                   background 0.2s ease;
     }
 
+    .auth-select {
+      width: 100%;
+      min-height: 47px;
+      padding: 11px 13px;
+      border: 1px solid #dce8de;
+      border-radius: 9px;
+      background: #f5faf6;
+      color: #203b30;
+      font: inherit;
+    }
+
     input:focus {
       border-color: #75ad8c;
       background: #fff;
@@ -245,6 +256,12 @@
       opacity: 0.7;
       transform: none;
     }
+
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 20px}
+    .auth-tab{min-height:40px;margin:0;border:1px solid #dce8de;background:transparent;color:#42634f}
+    .auth-tab[aria-selected="true"]{border-color:#287b59;background:#eaf3ec;color:#216849}
+    .auth-form[hidden],.auth-field[hidden]{display:none}
+    .auth-submit{margin-top:22px}
 
     /* ERROR AND FOOTER */
 
@@ -387,8 +404,8 @@
         <p class="eyebrow">People · Projects · Progress</p>
         <h1>Welcome back</h1>
         <p class="intro">
-          Your projects and people, all moving forward together.
-          Sign in to pick up where you left off.
+          Your projects and people, moving forward together.
+          Choose your profile to continue to your workspace.
         </p>
       </div>
 
@@ -400,56 +417,36 @@
 
     <section class="login-panel">
       <main>
-        <h2 class="signin-title">Sign in</h2>
-        <p class="signin-intro">Use your organization account to continue to your workspace.</p>
-
-        <!-- EXISTING LOGIN FORM -->
-
-        <form id="signin-form">
-
-          <label for="email">
-            Organization email
-          </label>
-
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autocomplete="username"
-            required
-          >
-
-          <label for="password">
-            Password
-          </label>
-
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-
-          <button
-            id="signin-submit"
-            type="submit"
-          >
-            Sign in
-          </button>
-
-          <p
-            id="signin-error"
-            role="alert"
-            aria-live="polite"
-          ></p>
-
+        <h2 class="signin-title" id="auth-title">Sign in</h2>
+        <p class="signin-intro" id="auth-intro">Choose your profile to continue.</p>
+        <div class="auth-tabs" role="tablist" aria-label="Account options">
+          <button class="auth-tab" id="login-tab" type="button" role="tab" aria-selected="true" aria-controls="login-form">Log in</button>
+          <button class="auth-tab" id="signup-tab" type="button" role="tab" aria-selected="false" aria-controls="signup-form">Sign up</button>
+        </div>
+        <form class="auth-form" id="login-form">
+          <label for="login-email">Organization email</label>
+          <input id="login-email" type="email" autocomplete="username" required>
+          <label for="login-role">I am logging in as</label>
+          <select id="login-role" class="auth-select">
+            <option value="employee">Employee</option>
+            <option value="manager">Manager</option>
+          </select>
+          <button class="auth-submit" id="login-submit" type="submit">Log in</button>
         </form>
-
-        <p class="help">
-          Sign in with your organization email and password.
-          Your account role determines which portal opens.
-        </p>
+        <form class="auth-form" id="signup-form" hidden>
+          <label for="signup-name">Full name</label>
+          <input id="signup-name" type="text" maxlength="100" autocomplete="name" required>
+          <label for="signup-email">Organization email</label>
+          <input id="signup-email" type="email" autocomplete="email" required>
+          <label for="signup-role">I am signing up as</label>
+          <select id="signup-role" class="auth-select">
+            <option value="employee">Employee</option>
+            <option value="manager">Manager</option>
+          </select>
+          <button class="auth-submit" id="signup-submit" type="submit">Create profile</button>
+        </form>
+        <p id="signin-error" role="alert" aria-live="polite"></p>
+        <p class="help">This open workspace selects a profile by email and role; it does not verify identity or protect database records. Roles are self-selected.</p>
 
       </main>
 
@@ -457,108 +454,97 @@
 
   </div>
 
-  <!-- EXISTING SUPABASE CONNECTION -->
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
-
-  <!-- EXISTING AUTHENTICATION LOGIC -->
-
   <script>
     (() => {
       "use strict";
+      const loginForm = document.querySelector("#login-form");
+      const signupForm = document.querySelector("#signup-form");
+      const message = document.querySelector("#signin-error");
+      const loginTab = document.querySelector("#login-tab");
+      const signupTab = document.querySelector("#signup-tab");
 
-      const form = document.querySelector("#signin-form");
-      const submit = document.querySelector("#signin-submit");
-      const errorMessage = document.querySelector("#signin-error");
-
-      function showError(message) {
-        errorMessage.textContent = message;
+      function setMode(mode) {
+        const signingUp = mode === "signup";
+        loginForm.hidden = signingUp;
+        signupForm.hidden = !signingUp;
+        loginTab.setAttribute("aria-selected", String(!signingUp));
+        signupTab.setAttribute("aria-selected", String(signingUp));
+        document.querySelector("#auth-title").textContent = signingUp ? "Create your profile" : "Choose your profile";
+        document.querySelector("#auth-intro").textContent = signingUp
+          ? "Add your name, organization email, and workspace role."
+          : "Enter your organization email and select your workspace role.";
+        message.textContent = "";
       }
 
-      if (!window.orbitSupabase?.auth) {
-        showError("Authentication service could not be initialized. Check the Supabase configuration and network connection.");
-        submit.disabled = true;
-        return;
+      function routeProfile(profile) {
+        window.orbitSetIdentity(profile);
+        window.location.replace(profile.role === "manager" ? "./manager_IPT.html" : "./emp_IPT.html");
       }
 
-      function openPortal(role) {
-        const portal = role === "manager" ? "manager_IPT.html" : "emp_IPT.html";
-        window.location.replace(`./${portal}`);
-      }
+      loginTab.addEventListener("click", () => setMode("login"));
+      signupTab.addEventListener("click", () => setMode("signup"));
 
-      async function routeSession(session) {
-        if (!session?.user) return false;
-
-        const { data: profile, error } = await window.orbitSupabase
-          .from("profiles")
-          .select("role")
-          .eq("id", session.user.id)
-          .single();
-
-        if (error) {
-          console.error("Could not load the signed-in profile:", error);
-          showError(error.code === "PGRST116"
-            ? "No portal profile is linked to this account. Contact your Internal Project Tracker administrator."
-            : `Could not load your profile: ${error.message}`);
-          return false;
+      loginForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.querySelector("#login-submit");
+        button.disabled = true;
+        message.textContent = "";
+        try {
+          const email = document.querySelector("#login-email").value.trim().toLowerCase();
+          const role = document.querySelector("#login-role").value;
+          const { data, error } = await window.orbitSupabase.from("profiles")
+            .select("id,display_name,email,role")
+            .eq("email", email)
+            .eq("role", role)
+            .maybeSingle();
+          if (error) throw error;
+          if (!data) throw new Error("No profile matches that email and role.");
+          routeProfile(data);
+        } catch (error) {
+          console.error("Profile selection failed:", error);
+          message.textContent = `Could not open profile: ${error.message}`;
+        } finally {
+          button.disabled = false;
         }
+      });
 
-        if (profile.role !== "manager" && profile.role !== "employee") {
-          const { error: signOutError } = await window.orbitSupabase.auth.signOut();
-
-          if (signOutError) {
-            console.error("Could not sign out an account without a portal role:", signOutError);
-          }
-
-          showError("This account does not have access to an Internal Project Tracker portal.");
-          return false;
+      signupForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = document.querySelector("#signup-submit");
+        button.disabled = true;
+        message.textContent = "";
+        const requestedRole = document.querySelector("#signup-role").value;
+        const email = document.querySelector("#signup-email").value.trim().toLowerCase();
+        try {
+          const { data, error } = await window.orbitSupabase.from("profiles")
+            .insert({
+              display_name: document.querySelector("#signup-name").value.trim(),
+              email,
+              role: requestedRole
+            })
+            .select("id,display_name,email,role")
+            .single();
+          if (error) throw error;
+          routeProfile(data);
+        } catch (error) {
+          console.error("Profile creation failed:", error);
+          message.textContent = `Could not create profile: ${error.message}`;
+        } finally {
+          button.disabled = false;
         }
-
-        openPortal(profile.role);
-        return true;
-      }
+      });
 
       const loginError = new URLSearchParams(window.location.search).get("error");
-
       if (loginError) {
-        showError(loginError);
+        message.textContent = loginError;
         window.history.replaceState(null, "", window.location.pathname);
       }
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        submit.disabled = true;
-        showError("");
-
-        try {
-          const { data, error } = await window.orbitSupabase.auth.signInWithPassword({
-            email: document.querySelector("#email").value.trim(),
-            password: document.querySelector("#password").value
-          });
-
-          if (error) throw error;
-
-          await routeSession(data.session);
-
-        } catch (error) {
-          console.error("Supabase sign in failed:", error);
-          showError(`Sign in failed: ${error.message}`);
-
-        } finally {
-          submit.disabled = false;
-        }
-      });
-
-      window.orbitSupabase.auth.getSession().then(async ({ data, error }) => {
-        if (error) throw error;
-        await routeSession(data.session);
-
-      }).catch((error) => {
-        console.error("Could not restore the Supabase session:", error);
-        showError(`Could not restore your session: ${error.message}`);
-      });
-
+      const currentProfile = window.orbitGetIdentity();
+      if (currentProfile) {
+        routeProfile(currentProfile);
+      }
     })();
   </script>
 
