@@ -112,14 +112,24 @@
     .page-view{display:none}.page-view.active{display:block}
     .overview-view.hidden{display:none}
     .people-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .person-card{display:flex;width:100%;min-height:82px;align-items:center;padding:15px;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-    .person-card:focus-visible{outline:2px solid #6eb887;outline-offset:2px}
+    .person-card{position:relative;display:flex;width:100%;min-height:82px;align-items:center;justify-content:space-between;gap:12px;padding:15px;color:var(--ink);font:inherit;text-align:left}
+    .person-card-open{display:flex;min-width:0;flex:1;align-items:center;padding:0 36px 0 0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .person-card-open:focus-visible{outline:2px solid #6eb887;outline-offset:4px;border-radius:4px}
+    .person-menu{position:absolute;top:8px;right:8px;z-index:2}
+    .person-menu-toggle{display:grid;width:34px;height:34px;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:20px;line-height:1}
+    .person-menu-toggle:hover,.person-menu-toggle[aria-expanded="true"]{border-color:#6eb887;background:var(--green-soft)}
+    .person-menu-toggle:focus-visible{outline:2px solid #6eb887;outline-offset:2px}
+    .person-menu-options{position:absolute;z-index:5;top:calc(100% + 5px);right:0;min-width:150px;padding:5px;border:1px solid var(--line);border-radius:9px;background:var(--surface);box-shadow:var(--shadow)}
+    .person-menu-options[hidden]{display:none}
+    .person-menu-delete{width:100%;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:var(--red);font-size:10px;font-weight:700;text-align:left}
+    .person-menu-delete:hover{background:var(--red-soft)}
     .person-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
     .person-top .avatar{width:36px;height:36px}.person-name{font-size:11px;font-weight:700}.person-role{margin-top:3px;color:var(--muted);font-size:9px}
     .person-card .person-top{margin:0}
     .person-projects{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);color:var(--muted);font-size:9px;line-height:1.7}
     .person-timesheet-button{margin-top:12px}
     .employee-detail-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    #view-all-timesheets-button{margin-left:auto;white-space:nowrap}
     #employee-detail-name{margin:0;font-size:16px}
     #employee-detail-summary{margin:4px 0 0;font-size:10px}
     .employee-project-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -154,8 +164,9 @@
     #timesheet-modal .modal{width:min(900px,100%)}
     .blocker-note{padding:7px 9px;border:1px solid #f4e6cc;border-radius:7px;background:#fffaf0;color:#785d32}
     .releases-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px}
+    #detail-releases-panel .releases-grid{grid-template-columns:1fr;padding:0}
     .release-item{display:flex;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--line);border-radius:9px}
-    .release-name{font-size:10px;font-weight:700}.release-project{margin-top:4px;color:var(--muted);font-size:9px}.release-description{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.release-date{color:#657087;font-size:9px;white-space:nowrap}
+    .release-name{font-size:10px;font-weight:700}.release-project{margin-top:4px;color:var(--muted);font-size:9px}.release-description{margin-top:5px;color:var(--muted);font-size:10px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.release-date{color:#657087;font-size:9px;white-space:nowrap}.release-actions{display:flex;align-items:flex-start;gap:10px}
     .modal-backdrop{position:fixed;inset:0;z-index:8;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(18,27,48,.42)}
     .modal-backdrop.open{display:flex}
     .modal{width:min(690px,100%);max-height:min(92vh,850px);overflow:auto;border-radius:14px;background:var(--surface);box-shadow:0 25px 90px rgba(13,22,43,.23)}
@@ -2044,10 +2055,13 @@ body:has(#projects-view.active) main {
 }
 #people-view #people-grid .person-card {
   min-height: 112px !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   padding: 18px !important;
   border-radius: 15px !important;
   background: rgba(255, 255, 250, .94) !important;
+}
+#people-view #people-grid .person-card-open {
+  min-height: 70px;
 }
 #people-view #people-grid .person-card .person-top {
   width: 100%;
@@ -2172,7 +2186,7 @@ body:has(#projects-view.active) main {
                 <strong id="manager-menu-name">Manager</strong>
                 <span class="account-menu-role">Project manager</span>
               </div>
-              <button class="account-signout" id="manager-account-signout" type="button">Switch profile</button>
+              <button class="account-signout" id="manager-account-signout" type="button">Sign out</button>
             </div>
           </div>
         </div>
@@ -2271,6 +2285,7 @@ body:has(#projects-view.active) main {
           <div class="employee-detail-toolbar">
             <button class="secondary-button" id="employee-detail-back" type="button">← All people</button>
             <div><h2 id="employee-detail-name"></h2><p class="muted" id="employee-detail-summary"></p></div>
+            <button class="secondary-button" id="view-all-timesheets-button" type="button">View all timesheets</button>
           </div>
           <div class="employee-project-grid" id="employee-project-grid"></div>
         </section>
@@ -2383,10 +2398,12 @@ body:has(#projects-view.active) main {
       let timesheets = [];
       let projectTimesheetEntries = [];
       let projectTimesheetPage = 1;
+      let timesheetIncludesProjectName = false;
       const PROJECT_TIMESHEETS_PER_PAGE = 5;
       let managerUser = null;
       let managerProfile = null;
       let selectedDetailId = "";
+      const DEPLOYED_LINK_TITLE = "Deployed project link";
       let toastTimer;
 
       function showToast(message) {
@@ -2494,18 +2511,20 @@ body:has(#projects-view.active) main {
         return employees.find((person)=>person.legacyNames?.includes(name))?.name || name;
       }
       const projectPeople = (project) => (project.employeeIds||[]).map(employee).filter(Boolean);
+      function getLatestDeployedLink(project) {
+        return (project.researchReleases||[])
+          .filter((release)=>release.title===DEPLOYED_LINK_TITLE)
+          .sort((a,b)=>(Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0))[0]||null;
+      }
       function getDeployedProjectUrl(project) {
-        const links=project.researchReleases||[];
-        const ordered=[...links].sort((a,b)=>Number(/production|deploy|live|preview/i.test(b.title))-Number(/production|deploy|live|preview/i.test(a.title)));
-        for(const link of ordered) {
-          try {
-            const url=new URL(link.url);
-            if(url.protocol==="http:"||url.protocol==="https:")return url.href;
-          } catch(error) {
-            console.warn("Skipping invalid project deployment URL:",error);
-          }
+        const latest=getLatestDeployedLink(project);
+        if(!latest)return "";
+        try {
+          const url=new URL(latest.url);
+          return url.protocol==="http:"||url.protocol==="https:" ? url.href : "";
+        } catch {
+          return "";
         }
-        return "";
       }
       const employeeTimesheets = (employeeIdValue) => timesheets.filter((entry)=>entry.employeeId===employeeIdValue&&projects.some((project)=>project.id===entry.projectId&&project.employeeIds.includes(employeeIdValue)));
       const savedProjectUpdates = () => updates.filter((item)=>item&&typeof item.projectId==="string"&&projects.some((project)=>project.id===item.projectId)).sort((a,b)=>(Number(b.timestamp)||0)-(Number(a.timestamp)||0));
@@ -2584,12 +2603,25 @@ body:has(#projects-view.active) main {
       }
       function renderReleases(target,filterProject="all",search="") {
         const q=search.toLowerCase();
-        const researchLinks=projects
+        const filteredProjects=projects
           .filter((project)=>filterProject==="all"||project.id===filterProject)
-          .flatMap((project)=>(project.researchReleases||[]).map((link)=>({project,link})))
+          .map((project)=>({project,links:(project.researchReleases||[])}));
+        const researchLinks=filteredProjects
+          .flatMap(({project,links})=>links.filter((link)=>link.title!==DEPLOYED_LINK_TITLE).map((link)=>({project,link})))
           .filter(({project,link})=>`${link.title} ${link.description} ${project.name}`.toLowerCase().includes(q));
-        const researchCards=researchLinks.map(({project,link})=>`<article class="release-item"><div><div class="release-name">${esc(link.title)}</div><div class="release-project">${esc(project.name)} · Shared research</div>${link.description?`<div class="release-description">${esc(link.description)}</div>`:""}</div><a class="release-date" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">Open link ↗</a></article>`).join("");
+        const deployedLinks=filteredProjects
+          .flatMap(({project,links})=>links.filter((link)=>link.title===DEPLOYED_LINK_TITLE).map((link)=>({project,link})))
+          .filter(({project,link})=>`${link.url} ${project.name}`.toLowerCase().includes(q));
+        const researchCards=researchLinks.map(({project,link})=>`<article class="release-item"><div><div class="release-name">${esc(link.title)}</div><div class="release-project">${esc(project.name)} · Shared research</div>${link.description?`<div class="release-description">${esc(link.description)}</div>`:""}</div><div class="release-actions"><a class="release-date" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">Open link ↗</a></div></article>`).join("");
+        const deployedCards=deployedLinks
+          .sort((a,b)=>(Date.parse(b.link.createdAt)||0)-(Date.parse(a.link.createdAt)||0))
+          .map(({project,link})=>{
+            const isLatest=getLatestDeployedLink(project)?.id===link.id;
+            return `<article class="release-item"><div><div class="release-name">${esc(project.name)} deployment${isLatest?" · Latest version":""}</div><div class="release-project">${esc(project.name)} · Deployed link${link.createdAt?` · Added ${esc(dateLabel(link.createdAt.slice(0,10)))}`:""}</div></div><div class="release-actions"><a class="release-date" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">Open link ↗</a></div></article>`;
+          }).join("");
         $(target).innerHTML=researchCards||'<div class="empty-state">No research links or releases have been added to this project yet.</div>';
+        const deployedTarget=$("#project-deployed-link-list");
+        if(deployedTarget)deployedTarget.innerHTML=deployedCards||'<div class="empty-state">No deployed link has been added to this project yet.</div>';
       }
       function renderTables() {
         const q=$("#project-search").value.trim().toLowerCase();
@@ -2607,24 +2639,78 @@ body:has(#projects-view.active) main {
         $("#people-directory").hidden=false;
         $("#employee-detail-view").hidden=true;
         updateExportButton(currentView);
-        $("#people-grid").innerHTML=employees.map((person)=>`<button class="panel person-card" type="button" data-employee="${esc(person.id)}" aria-pressed="false" aria-label="View projects for ${esc(person.name)}"><span class="person-top"><span class="avatar" style="background:${esc(person.color)}" aria-hidden="true">${esc(person.initials)}</span><span class="person-name">${esc(person.name)}</span></span></button>`).join("");
-        $$("[data-employee]",$("#people-grid")).forEach((button)=>button.addEventListener("click",()=>openEmployeeProjects(button.dataset.employee)));
+        const grid=$("#people-grid");
+        grid.innerHTML=employees.map((person)=>`<article class="panel person-card" data-employee-card="${esc(person.id)}">
+          <button class="person-card-open" type="button" data-open-employee="${esc(person.id)}" aria-label="View projects for ${esc(person.name)}">
+            <span class="person-top"><span class="avatar" style="background:${esc(person.color)}" aria-hidden="true">${esc(person.initials)}</span><span class="person-name">${esc(person.name)}</span></span>
+          </button>
+          <div class="person-menu">
+            <button class="person-menu-toggle" type="button" data-employee-menu="${esc(person.id)}" aria-label="Actions for ${esc(person.name)}" aria-haspopup="menu" aria-expanded="false">⋮</button>
+            <div class="person-menu-options" role="menu" hidden>
+              <button class="person-menu-delete" type="button" data-delete-employee="${esc(person.id)}" role="menuitem">Delete employee</button>
+            </div>
+          </div>
+        </article>`).join("");
+        grid.onclick=(event)=>{
+          const toggle=event.target.closest("[data-employee-menu]");
+          if(toggle) {
+            const menu=toggle.nextElementSibling;
+            const willOpen=menu.hidden;
+            $$(".person-menu-options",grid).forEach((options)=>{options.hidden=true;options.previousElementSibling.setAttribute("aria-expanded","false");});
+            menu.hidden=!willOpen;
+            toggle.setAttribute("aria-expanded",String(willOpen));
+            return;
+          }
+          const deleteButton=event.target.closest("[data-delete-employee]");
+          if(deleteButton) {
+            deleteEmployee(deleteButton.dataset.deleteEmployee);
+            return;
+          }
+          const openButton=event.target.closest("[data-open-employee]");
+          if(openButton)openEmployeeProjects(openButton.dataset.openEmployee);
+        };
+      }
+      async function deleteEmployee(employeeIdValue) {
+        const person=employee(employeeIdValue);
+        if(!person)return;
+        if(!window.confirm(`Permanently delete ${person.name}'s employee profile from the backend users list? This cannot be undone.`))return;
+        try {
+          const {data,error}=await window.orbitSupabase.from("profiles")
+            .delete().eq("id",employeeIdValue).eq("role","employee").select("id").single();
+          if(error)throw error;
+          if(!data)throw new Error("The employee profile was not found or could not be deleted.");
+        } catch(error) {
+          console.error("Could not delete employee profile:",error);
+          showToast(`Employee profile could not be deleted: ${error.message}`);
+          return;
+        }
+        try {
+          if(selectedEmployeeId===employeeIdValue)selectedEmployeeId=null;
+          await loadPortalData();
+          renderAll();
+          showToast(`${person.name} was removed from the employee directory.`);
+        } catch(error) {
+          console.error("Employee profile deleted but the portal could not refresh:",error);
+          showToast(`Employee profile was deleted, but the portal could not refresh: ${error.message}`);
+        }
       }
       function openEmployeeProjects(employeeIdValue) {
         const person=employee(employeeIdValue);
         if(!person)return;
         selectedEmployeeId=employeeIdValue;
+        $$(".person-menu-options",$("#people-grid")).forEach((options)=>{options.hidden=true;options.previousElementSibling.setAttribute("aria-expanded","false");});
         const assigned=projects.filter((project)=>project.employeeIds.includes(employeeIdValue)&&currentProjectStatus(project)!=="completed");
         $("#people-view").classList.add("employee-detail-open");
         $("#people-directory").hidden=true;
         $("#employee-detail-view").hidden=false;
         updateExportButton("people");
-        $$("[data-employee]",$("#people-grid")).forEach((button)=>{
-          const selected=button.dataset.employee===employeeIdValue;
+        $$("[data-open-employee]",$("#people-grid")).forEach((button)=>{
+          const selected=button.dataset.openEmployee===employeeIdValue;
           button.setAttribute("aria-pressed",String(selected));
         });
         $("#employee-detail-name").textContent=person.name;
         $("#employee-detail-summary").textContent=`${assigned.length} active project${assigned.length===1?"":"s"}`;
+        $("#view-all-timesheets-button").setAttribute("aria-label",`View all timesheets for ${person.name}`);
         $("#employee-project-grid").innerHTML=assigned.length?assigned.map((project)=>{
           const entryCount=employeeTimesheets(employeeIdValue).filter((entry)=>entry.projectId===project.id).length;
           return `<article class="panel employee-project-card"><h3>${esc(project.name)}</h3><p class="employee-project-meta">${esc(badgeLabel(currentProjectStatus(project)))} · ${esc(currentProjectProgress(project))}% complete</p><button class="secondary-button person-timesheet-button" type="button" data-view-project-timesheets="${esc(project.id)}" data-employee-id="${esc(employeeIdValue)}" aria-label="View ${esc(person.name)}’s timesheets for ${esc(project.name)}">View timesheets <span class="muted">(${entryCount})</span></button></article>`;
@@ -2635,6 +2721,8 @@ body:has(#projects-view.active) main {
         const person=employee(employeeIdValue);
         const project=projects.find((item)=>item.id===projectId&&item.employeeIds.includes(employeeIdValue));
         if(!person||!project)return;
+        $("#timesheet-modal").classList.remove("all-timesheets-view");
+        timesheetIncludesProjectName=false;
         projectTimesheetEntries=employeeTimesheets(employeeIdValue)
           .filter((entry)=>entry.projectId===projectId)
           .sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
@@ -2646,13 +2734,30 @@ body:has(#projects-view.active) main {
         renderProjectTimesheetPage();
         openModal("timesheet-modal");
       }
+      function openAllEmployeeTimesheets() {
+        const person=employee(selectedEmployeeId);
+        if(!person)return;
+        $("#timesheet-modal").classList.add("all-timesheets-view");
+        timesheetIncludesProjectName=true;
+        projectTimesheetEntries=employeeTimesheets(person.id)
+          .sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+        projectTimesheetPage=1;
+        const totalHours=projectTimesheetEntries.reduce((sum,entry)=>sum+Number(entry.hours),0);
+        const dayCount=new Set(projectTimesheetEntries.map((entry)=>entry.date)).size;
+        $("#timesheet-modal-title").textContent=`${person.name} · All timesheets`;
+        $("#timesheet-summary").innerHTML=`${dayCount} day${dayCount===1?"":"s"} · ${projectTimesheetEntries.length} entr${projectTimesheetEntries.length===1?"y":"ies"} · <strong>${totalHours.toFixed(2).replace(/\.?0+$/,"")} total hours</strong>`;
+        renderProjectTimesheetPage();
+        openModal("timesheet-modal");
+      }
       function renderProjectTimesheetPage() {
         const pageCount=Math.ceil(projectTimesheetEntries.length/PROJECT_TIMESHEETS_PER_PAGE);
         projectTimesheetPage=pageCount?Math.min(projectTimesheetPage,pageCount):1;
         const pageEntries=projectTimesheetEntries.slice((projectTimesheetPage-1)*PROJECT_TIMESHEETS_PER_PAGE,projectTimesheetPage*PROJECT_TIMESHEETS_PER_PAGE);
-        $("#timesheet-list").innerHTML=projectTimesheetEntries.length?`<div class="timesheet-table-wrap"><table class="timesheet-table"><thead><tr><th scope="col">Date</th><th scope="col">Hours</th><th scope="col">Work details</th></tr></thead><tbody>${pageEntries.map((entry)=>{
+        const projectColumn=timesheetIncludesProjectName?'<th scope="col">Project</th>':"";
+        $("#timesheet-list").innerHTML=projectTimesheetEntries.length?`<div class="timesheet-table-wrap"><table class="timesheet-table"><thead><tr><th scope="col">Date</th>${projectColumn}<th scope="col">Hours</th><th scope="col">Work details</th></tr></thead><tbody>${pageEntries.map((entry)=>{
           const [year,month,day]=entry.date.split("-");
-          return `<tr><td>${esc(`${day}/${month}/${year.slice(-2)}`)}</td><td>${Number(entry.hours).toFixed(2).replace(/\.?0+$/,"")}</td><td>${esc(entry.work)}</td></tr>`;
+          const projectCell=timesheetIncludesProjectName?`<td>${esc(projects.find((project)=>project.id===entry.projectId)?.name||"Unknown project")}</td>`:"";
+          return `<tr><td>${esc(`${day}/${month}/${year.slice(-2)}`)}</td>${projectCell}<td>${Number(entry.hours).toFixed(2).replace(/\.?0+$/,"")}</td><td>${esc(entry.work)}</td></tr>`;
         }).join("")}</tbody></table></div><nav class="timesheet-pagination" aria-label="Timesheet pages"><button type="button" data-timesheet-page="${projectTimesheetPage-1}"${projectTimesheetPage===1?" disabled":""}>Previous</button><span>Page ${projectTimesheetPage} of ${pageCount} · ${projectTimesheetEntries.length} timesheets</span><button type="button" data-timesheet-page="${projectTimesheetPage+1}"${projectTimesheetPage===pageCount?" disabled":""}>Next</button></nav>`:'<div class="empty-state">No timesheets have been submitted for this project by this employee yet.</div>';
         $$("#timesheet-list [data-timesheet-page]").forEach((button)=>button.addEventListener("click",()=>{
           const requestedPage=Number(button.dataset.timesheetPage);
@@ -2976,9 +3081,13 @@ body:has(#projects-view.active) main {
             </section>
           </div>
           <div class="detail-tab-panel detail-layout" id="detail-releases-panel" hidden>
-            <section class="detail-section span-2">
-              <div class="detail-section-head"><h3>Research and Releases</h3><span class="muted">${esc(project.name)}</span></div>
+            <section class="detail-section">
+              <div class="detail-section-head"><h3>Research and Releases</h3></div>
               <div class="releases-grid" id="project-release-list"></div>
+            </section>
+            <section class="detail-section">
+              <div class="detail-section-head"><h3>Deployed link</h3><span class="muted">${esc(project.name)}</span></div>
+              <div class="releases-grid" id="project-deployed-link-list"></div>
             </section>
           </div>
           <div class="detail-tab-panel detail-layout" id="detail-updates-panel" hidden>
@@ -3139,35 +3248,41 @@ body:has(#projects-view.active) main {
         showToast("Project report downloaded.");
       }
       function downloadPeopleTimesheetsReport() {
-        const person=employee(selectedEmployeeId);
-        if(!person) {
-          showToast("Select an employee to export their timesheets.");
+        if(!employees.length) {
+          showToast("There are no employee timesheets to export.");
           return;
         }
-        const timesheetRows=[["Timesheet ID","Employee","Employee ID","Date","Project","Project ID","Hours","Work details","Submitted at"]];
-        const employeeEntries=timesheets.filter((entry)=>entry.employeeId===person.id);
-        [...employeeEntries].sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.createdAt)||0)-(Number(a.createdAt)||0)).forEach((entry)=>{
-          const project=projects.find((item)=>item.id===entry.projectId);
-          timesheetRows.push([
-            entry.id||"",employeeName(entry.employeeId),entry.employeeId||"",entry.date||"",project?.name||"",
-            entry.projectId||"",Number(entry.hours)||0,entry.work||"",entry.createdAt?new Date(entry.createdAt).toISOString():""
-          ]);
+        const sheetNames=new Set();
+        const sheets=employees.map((person)=>{
+          const timesheetRows=[["Timesheet ID","Employee","Employee ID","Date","Project","Project ID","Hours","Work details","Submitted at"]];
+          const employeeEntries=timesheets.filter((entry)=>entry.employeeId===person.id)
+            .sort((a,b)=>b.date.localeCompare(a.date)||(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+          employeeEntries.forEach((entry)=>{
+            const project=projects.find((item)=>item.id===entry.projectId);
+            timesheetRows.push([
+              entry.id||"",person.name,person.id,entry.date||"",project?.name||"",
+              entry.projectId||"",Number(entry.hours)||0,entry.work||"",entry.createdAt?new Date(entry.createdAt).toISOString():""
+            ]);
+          });
+          const baseName=person.name.replace(/[:\\/?*\[\]]/g," ").replace(/^'+|'+$/g,"").trim().slice(0,31).replace(/^'+|'+$/g,"").trim()||"Employee";
+          let sheetName=baseName;
+          let suffix=2;
+          while(sheetNames.has(sheetName.toLowerCase())) {
+            const ending=` (${suffix++})`;
+            sheetName=`${baseName.slice(0,31-ending.length)}${ending}`;
+          }
+          sheetNames.add(sheetName.toLowerCase());
+          return {name:sheetName,rows:timesheetRows};
         });
-        const filename=person.name.toLowerCase().replace(/[^a-z0-9_-]+/g,"-").replace(/^-|-$/g,"")||person.id;
-        downloadExcelWorkbook(`internal-project-tracker-${filename}-timesheets.xlsx`,[
-          {name:"Timesheets",rows:timesheetRows}
-        ]);
-        showToast(`${person.name}'s timesheets downloaded (${employeeEntries.length} entr${employeeEntries.length===1?"y":"ies"}).`);
+        downloadExcelWorkbook("internal-project-tracker-timesheets.xlsx",sheets);
+        showToast(`Timesheets downloaded for ${employees.length} employee${employees.length===1?"":"s"}.`);
       }
       function updateExportButton(view) {
         const button=$("#export-button");
-        const selectedPerson=employee(selectedEmployeeId);
         const settings={
           overview:{label:"Export overview",title:"Download overview report as an Excel workbook"},
           projects:{label:"Export projects",title:"Download all project details as an Excel workbook"},
-          people:selectedPerson
-            ?{label:`Export ${selectedPerson.name}'s timesheets`,title:`Download only ${selectedPerson.name}'s timesheets as an Excel workbook`}
-            :{label:"Select an employee",title:"Open an employee profile before exporting timesheets",disabled:true}
+          people:{label:"Export all timesheets",title:"Download each employee's timesheets in a separate Excel worksheet"}
         }[view];
         button.hidden=!settings;
         if(settings) {
@@ -3188,6 +3303,7 @@ body:has(#projects-view.active) main {
         $("#breadcrumb-workspace").addEventListener("click",()=>setView("overview"));
         $("#breadcrumb-label").addEventListener("click",()=>setView($("#breadcrumb-label").dataset.view));
         $("#employee-detail-back").addEventListener("click",renderPeople);
+        $("#view-all-timesheets-button").addEventListener("click",openAllEmployeeTimesheets);
         $("#add-person-button").addEventListener("click",openAddPerson);
         $$("[data-create]").forEach((button)=>button.addEventListener("click",()=>openCreate()));
         $$("[data-go]").forEach((button)=>button.addEventListener("click",()=>setView(button.dataset.go)));
@@ -3198,9 +3314,17 @@ body:has(#projects-view.active) main {
           else closeModals();
         }));
         document.addEventListener("keydown",(event)=>{
+          if(event.key==="Escape") {
+            $$(".person-menu-options").forEach((options)=>{options.hidden=true;options.previousElementSibling.setAttribute("aria-expanded","false");});
+          }
           if(event.key!=="Escape")return;
           if($("#delete-confirmation-modal").classList.contains("open"))closeProjectDeleteConfirmation();
           else closeModals();
+        });
+        document.addEventListener("click",(event)=>{
+          if(event.target instanceof Element&&!event.target.closest(".person-menu")) {
+            $$(".person-menu-options").forEach((options)=>{options.hidden=true;options.previousElementSibling.setAttribute("aria-expanded","false");});
+          }
         });
         window.addEventListener("resize",()=>{if($("#detail-modal").classList.contains("open"))syncDetailModalBounds();});
         $("#project-form").addEventListener("submit",saveProject);

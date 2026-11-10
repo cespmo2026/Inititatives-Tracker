@@ -111,12 +111,15 @@
     .release-link-actions { display: flex; flex: 0 0 auto; align-items: flex-start; gap: 10px; }
     .release-link-edit { padding: 0; border: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 700; }
     .release-link-edit:hover { text-decoration: underline; }
+    .release-link-delete { padding: 0; border: 0; background: transparent; color: var(--red); font-size: 10px; font-weight: 700; }
+    .release-link-delete:hover { text-decoration: underline; }
     .release-link-form { display: grid; gap: 9px; margin-top: 14px; }
     .release-link-form .primary-button { justify-self: start; }
     .release-link-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
     .release-message { min-height: 0; margin: 0; color: var(--red); font-size: 10px; line-height: 1.5; }
     .release-message:empty { display: none; }
     .milestone-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(150px, .7fr) auto; align-items: end; gap: 9px; margin-top: 12px; }
+    .milestone-form > button[type="submit"] { margin-bottom: 14px; }
     .milestone-form[hidden] { display: none; }
     .milestone-message { grid-column: 1 / -1; min-height: 0; margin: 0; color: var(--red); font-size: 10px; }
     .milestone-message:empty { display: none; }
@@ -126,9 +129,16 @@
     .milestone-subsection-head { justify-content: flex-start; }
     .milestone-subsection-head h3 { margin-right: auto; }
     .milestone-add-action { flex: 0 0 auto; }
-    .release-content-layout { display: grid; gap: 22px; }
-    .release-content-layout .release-link-form { order: 1; }
-    .release-content-layout .release-links { order: 2; }
+    .release-content-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); align-items: start; gap: 22px; }
+    .release-section { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 10px; background: #fbfffb; }
+    .release-section h3 { margin: 0; font-size: 13px; }
+    .release-deployed-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 9px; }
+    .release-deployed-form .form-field { margin-bottom: 0; }
+    .project-team-add { display: grid; gap: 8px; margin-top: 12px; }
+    .project-team-add-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .project-team-add-row .control { flex: 1 1 170px; }
+    .project-team-add-message { margin: 0; color: var(--red); font-size: 10px; }
+    .project-team-add-message:empty { display: none; }
     .update-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .update-actions [hidden] { display: none; }
     .update-state { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.5; }
@@ -1703,6 +1713,16 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
     .project-progress-metric strong{color:#145b3b!important;font-size:14px!important}
     main{padding-top:0!important}
     .topbar{padding-top:8px!important;padding-bottom:8px!important}
+    .app{width:100%!important;max-width:none!important;margin:0!important;grid-template-columns:clamp(210px,16vw,280px) minmax(0,1fr)!important}
+    main{width:100%!important;max-width:none!important;margin:0!important;padding:16px clamp(18px,2.6vw,48px) 36px!important}
+    .topbar{min-height:44px!important;align-items:center!important;margin-bottom:4px!important;padding-block:8px!important}
+    .breadcrumb{display:inline-flex!important;min-height:24px;align-items:center;line-height:1.5}
+    .updates-panel{width:100%;max-width:none}
+    #updates-view .employee-section-hero,#timesheets-view .employee-section-hero{margin:8px 0 14px}
+    #updates-view .updates-panel{margin-top:0}
+    #timesheets-view .timesheet-layout{gap:12px!important}
+    @media(max-width:900px){.app{grid-template-columns:72px minmax(0,1fr)!important}main{padding:20px!important}}
+    @media(max-width:620px){.app{grid-template-columns:1fr!important}main{padding:15px 12px 28px!important}}
 </style>
 </head>
 <body>
@@ -1749,7 +1769,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
                 <strong id="employee-menu-name">Employee</strong>
                 <span class="account-menu-role">Employee</span>
               </div>
-              <button class="account-signout" id="employee-account-signout" type="button">Switch profile</button>
+              <button class="account-signout" id="employee-account-signout" type="button">Sign out</button>
             </div>
           </div>
         </div>
@@ -1931,6 +1951,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       let selectedUpdatesProjectId = "";
       let selectedUpdatesPage = 1;
       let editingReleaseId = "";
+      const DEPLOYED_LINK_TITLE = "Deployed project link";
       document.addEventListener("pointerdown", (event) => {
         if (activeWeekCalendar && !activeWeekCalendar.picker.contains(event.target)) {
           activeWeekCalendar.close();
@@ -1941,21 +1962,24 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
       })[char]);
       const dateLabel = (date) => date ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(date + "T12:00:00")) : "Not set";
+      const releaseTimestamp = (release) => typeof release.createdAt==="number"
+        ? release.createdAt
+        : Date.parse(release.createdAt)||0;
+      const deployedProjectLinks = (project) => (project.releases||[])
+        .filter((release)=>release.title===DEPLOYED_LINK_TITLE)
+        .sort((a,b)=>releaseTimestamp(b)-releaseTimestamp(a));
       const submittedDateTimeLabel = (timestamp) => timestamp ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(timestamp)) : "Date and time unavailable";
       const badgeLabel = (status) => ({ "on-track": "On track", "at-risk": "At risk", blocked: "On hold", completed: "Completed" })[status] || status;
       const getProject = (id) => projects.find((project) => project.id === id &&  isAssigned(project));
       function getDeployedProjectUrl(project) {
-        const links=project.releases||[];
-        const ordered=[...links].sort((a,b)=>Number(/production|deploy|live|preview/i.test(b.title))-Number(/production|deploy|live|preview/i.test(a.title)));
-        for(const link of ordered) {
-          try {
-            const url=new URL(link.url);
-            if(url.protocol==="http:"||url.protocol==="https:")return url.href;
-          } catch(error) {
-            console.warn("Skipping invalid project deployment URL:",error);
-          }
+        const latest=deployedProjectLinks(project)[0];
+        if(!latest)return "";
+        try {
+          const url=new URL(latest.url);
+          return url.protocol==="http:"||url.protocol==="https:" ? url.href : "";
+        } catch {
+          return "";
         }
-        return "";
       }
       let updates = [];
       let timesheets = [];
@@ -1963,13 +1987,20 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
       let releaseLoadError = null;
       let projectTeamMembers = new Map();
       let projectTeamLoadError = null;
+      let teamCandidates = [];
+      let teamCandidatesLoadError = null;
       const isAssigned = (project) => project.employeeId === employeeId || (Array.isArray(project.employeeIds) && project.employeeIds.includes(employeeId));
 
       async function loadPortalData(user) {
         const db=window.orbitSupabase;
-        const {data:members,error:memberError}=await db.from("project_members")
-          .select("project_id").eq("employee_id",user.id);
+        const [{data:members,error:memberError},{data:profileRows,error:profilesError}]=await Promise.all([
+          db.from("project_members").select("project_id").eq("employee_id",user.id),
+          db.from("profiles").select("id,display_name").eq("role","employee").order("display_name")
+        ]);
         if(memberError)throw memberError;
+        teamCandidatesLoadError=profilesError;
+        teamCandidates=(profileRows||[]).map((profile)=>({id:profile.id,name:profile.display_name}));
+        if(profilesError)console.error("Could not load employees for project team assignment:",profilesError);
         const projectIds=(members||[]).map((member)=>member.project_id);
         if(!projectIds.length){projects=[];updates=[];timesheets=[];releases=[];releaseLoadError=null;projectTeamMembers=new Map();projectTeamLoadError=null;selectedId="";return;}
         const results=await Promise.all([
@@ -2165,6 +2196,8 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         if(employeeProfile&&!projectTeam.some((member)=>member.id===employeeId)) {
           projectTeam.push({id:employeeId,name:employeeProfile.display_name,role:employeeProfile.role||"Employee"});
         }
+        const assignedEmployeeIds=new Set(projectTeam.map((member)=>member.id));
+        const availableTeamCandidates=teamCandidates.filter((candidate)=>!assignedEmployeeIds.has(candidate.id));
         const teamContent=projectTeamLoadError
           ? `<div class="empty-state">Team assignments could not be loaded: ${esc(projectTeamLoadError.message)}</div>`
           : projectTeam.length
@@ -2173,6 +2206,21 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
               return `<div class="project-team-member"><span class="avatar" aria-hidden="true">${esc(initials)}</span><div class="project-team-member-copy"><div class="project-team-member-name">${esc(member.name)}</div></div></div>`;
             }).join("")
             : '<div class="empty-state">No team members are assigned to this project.</div>';
+        const teamAddContent=teamCandidatesLoadError
+          ? `<p class="project-team-add-message">Employees could not be loaded: ${esc(teamCandidatesLoadError.message)}</p>`
+          : availableTeamCandidates.length
+            ? `<form class="project-team-add" id="project-team-add-form">
+                <label for="project-team-candidate">Add a person to this project</label>
+                <div class="project-team-add-row">
+                  <select class="control" id="project-team-candidate" required>
+                    <option value="">Select an employee</option>
+                    ${availableTeamCandidates.map((candidate)=>`<option value="${esc(candidate.id)}">${esc(candidate.name)}</option>`).join("")}
+                  </select>
+                  <button class="primary-button" type="submit">Add person</button>
+                </div>
+                <p class="project-team-add-message" id="project-team-add-message" role="status" aria-live="polite"></p>
+              </form>`
+            : '<p class="muted">All available employees are already assigned.</p>';
         panel.innerHTML = `
           <div class="detail-header">
             <div class="detail-breadcrumb"><button type="button" data-breadcrumb-view="overview">Workspace</button> <span aria-hidden="true">/</span> <button type="button" data-breadcrumb-view="projects">My projects</button> <span aria-hidden="true">/</span> <b>${esc(project.name)}</b></div>
@@ -2214,6 +2262,7 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
               <section class="project-overview-card">
                 <div class="project-overview-heading"><h3>Team & resources</h3></div>
                 <div class="project-team-list">${teamContent}</div>
+                ${teamAddContent}
               </section>
             </div>
           </section>
@@ -2233,16 +2282,31 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           </section>
           <section class="detail-tab-panel" id="project-releases-panel" hidden>
             <div class="release-content-layout">
-              <form class="release-link-form" id="release-link-form">
-                <div class="form-field"><label for="release-link-title">Name</label><input class="control" id="release-link-title" maxlength="100" placeholder="e.g. Production deployment" value="${esc(editingRelease?.title||"")}" required></div>
-                <div class="form-field"><label for="release-link-url">URL</label><input class="control" id="release-link-url" type="url" maxlength="2048" placeholder="https://example.com" value="${esc(editingRelease?.url||"")}" required></div>
-                <div class="form-field"><label for="release-link-description">Description</label><textarea class="control" id="release-link-description" maxlength="5000" rows="3" placeholder="Add a summary or important information about this link">${esc(editingRelease?.description||"")}</textarea></div>
-                <p class="release-message" id="release-message" role="alert" aria-live="polite"></p>
-                <div class="release-link-form-actions"><button class="primary-button" type="submit">${editingRelease ? "Save changes" : "Add link"}</button>${editingRelease ? '<button class="secondary-button" type="button" data-cancel-release-edit>Cancel</button>' : ""}</div>
-              </form>
-              ${releaseLoadError ? `<div class="empty-state" style="padding:10px">Local demo release links could not be loaded. ${esc(releaseLoadError.message)}</div>` : ""}
-              <div class="release-links">${releaseLoadError ? "" : project.releases.length ? project.releases.map((release) => `
-                <article class="release-link"><div class="release-link-copy"><div class="release-link-title">${esc(release.title)}</div>${release.description ? `<div class="release-link-description">${esc(release.description)}</div>` : ""}</div><div class="release-link-actions">${release.employeeId===employeeId ? `<button class="release-link-edit" type="button" data-edit-release="${esc(release.id)}">Edit</button>` : ""}<a href="${esc(release.url)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a></div></article>`).join("") : '<div class="empty-state" style="padding:10px">No links have been added to this project yet.</div>'}</div>
+              <section class="release-section">
+                <h3>Research and Releases</h3>
+                <form class="release-link-form" id="release-link-form">
+                  <div class="form-field"><label for="release-link-title">Name</label><input class="control" id="release-link-title" maxlength="100" placeholder="e.g. Research report" value="${esc(editingRelease?.title||"")}" required></div>
+                  <div class="form-field"><label for="release-link-url">URL</label><input class="control" id="release-link-url" type="url" maxlength="2048" placeholder="https://example.com" value="${esc(editingRelease?.url||"")}" required></div>
+                  <div class="form-field"><label for="release-link-description">Description</label><textarea class="control" id="release-link-description" maxlength="5000" rows="3" placeholder="Add a summary or important information about this link">${esc(editingRelease?.description||"")}</textarea></div>
+                  <p class="release-message" id="release-message" role="alert" aria-live="polite"></p>
+                  <div class="release-link-form-actions"><button class="primary-button" type="submit">${editingRelease ? "Save changes" : "Add link"}</button>${editingRelease ? '<button class="secondary-button" type="button" data-cancel-release-edit>Cancel</button>' : ""}</div>
+                </form>
+                ${releaseLoadError ? `<div class="empty-state" style="padding:10px">Research and releases could not be loaded. ${esc(releaseLoadError.message)}</div>` : ""}
+                <div class="release-links">${releaseLoadError ? "" : project.releases.filter((release)=>release.title!==DEPLOYED_LINK_TITLE).length ? project.releases.filter((release)=>release.title!==DEPLOYED_LINK_TITLE).map((release) => `
+                  <article class="release-link"><div class="release-link-copy"><div class="release-link-title">${esc(release.title)}</div>${release.description ? `<div class="release-link-description">${esc(release.description)}</div>` : ""}</div><div class="release-link-actions">${release.employeeId===employeeId ? `<button class="release-link-edit" type="button" data-edit-release="${esc(release.id)}">Edit</button>` : ""}<button class="release-link-delete" type="button" data-delete-release="${esc(release.id)}">Delete</button><a href="${esc(release.url)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a></div></article>`).join("") : '<div class="empty-state" style="padding:10px">No research links or releases have been added yet.</div>'}</div>
+              </section>
+              <section class="release-section">
+                <h3>Deployed link</h3>
+                <form class="release-deployed-form" id="deployed-link-form">
+                  <div class="form-field"><label for="deployed-link-url">Project URL</label><input class="control" id="deployed-link-url" type="url" maxlength="2048" placeholder="https://example.com" required></div>
+                  <button class="primary-button" type="submit">Add deployed link</button>
+                </form>
+                <p class="release-message" id="deployed-link-message" role="alert" aria-live="polite"></p>
+                ${releaseLoadError ? "" : deployedProjectLinks(project).length
+                  ? `<div class="release-links">${deployedProjectLinks(project).map((release,index)=>`
+                    <article class="release-link"><div class="release-link-copy"><div class="release-link-title">${index===0?'<strong>Latest version</strong> · ':""}${esc(release.url)}</div><div class="release-link-description">${release.createdAt?`Added ${esc(dateLabel(new Date(releaseTimestamp(release)).toISOString().slice(0,10)))}`:"Date unavailable"}</div></div><div class="release-link-actions"><button class="release-link-delete" type="button" data-delete-release="${esc(release.id)}">Delete</button><a href="${esc(release.url)}" target="_blank" rel="noopener noreferrer">Open link <span aria-hidden="true">↗</span></a></div></article>`).join("")}</div>`
+                  : '<div class="empty-state" style="padding:10px">No deployed link has been added yet.</div>'}
+              </section>
             </div>
           </section>
           <section class="detail-tab-panel" id="project-submit-panel" hidden>
@@ -2275,6 +2339,12 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
         });
 
         $("#release-link-form").addEventListener("submit", (event) => saveProjectRelease(event, project));
+        $("#deployed-link-form").addEventListener("submit", (event) => saveDeployedProjectLink(event, project));
+        panel.querySelectorAll("[data-delete-release]").forEach((button) => {
+          button.addEventListener("click", () => deleteProjectRelease(project, button.dataset.deleteRelease));
+        });
+        const teamForm=$("#project-team-add-form");
+        if(teamForm)teamForm.addEventListener("submit",(event)=>addProjectTeamMember(event,project));
         panel.querySelectorAll("[data-edit-release]").forEach((button) => {
           button.addEventListener("click", () => {
             editingReleaseId = button.dataset.editRelease;
@@ -2493,8 +2563,8 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
             if (error) throw error;
           }
         } catch(error) {
-          console.error(`Could not ${releaseId ? "update" : "save"} the deployed project link:`, error);
-          message.textContent = `Link could not be ${releaseId ? "updated" : "saved"}: ${error.message}`;
+          console.error(`Could not ${releaseId ? "update" : "save"} the research and release link:`, error);
+          message.textContent = `Research and release link could not be ${releaseId ? "updated" : "saved"}: ${error.message}`;
           submitButton.disabled = false;
           return;
         }
@@ -2505,9 +2575,117 @@ hr,.divider{border-color:#d6e8d9!important}a,.text-link{color:#245f40!important}
           setProjectTab("releases");
           showToast(releaseId ? "Research and release link updated." : "Research and release link added.");
         } catch(error) {
-          console.error("Deployed link saved but project data could not refresh:", error);
-          message.textContent = `Link was ${releaseId ? "updated" : "saved"}, but the project could not refresh: ${error.message}`;
+          console.error("Research and release link saved but project data could not refresh:", error);
+          message.textContent = `Research and release link was ${releaseId ? "updated" : "saved"}, but the project could not refresh: ${error.message}`;
           submitButton.disabled = false;
+        }
+      }
+
+      async function saveDeployedProjectLink(event, project) {
+        event.preventDefault();
+        const form=event.currentTarget;
+        const button=form.querySelector('button[type="submit"]');
+        const message=$("#deployed-link-message");
+        let url;
+        try {
+          url=new URL($("#deployed-link-url").value.trim());
+        } catch {
+          message.textContent="Enter a valid deployed URL.";
+          return;
+        }
+        if(!["http:","https:"].includes(url.protocol)) {
+          message.textContent="Deployed links must use HTTP or HTTPS.";
+          return;
+        }
+        button.disabled=true;
+        message.textContent="";
+        try {
+          const {error}=await window.orbitSupabase.from("project_releases").insert({
+            project_id:project.id,created_by:employeeId,title:DEPLOYED_LINK_TITLE,url:url.href,description:""
+          });
+          if(error)throw error;
+        } catch(error) {
+          console.error("Could not save deployed project link:",error);
+          message.textContent=`Deployed link could not be saved: ${error.message}`;
+          button.disabled=false;
+          return;
+        }
+        try {
+          await loadPortalData(currentUser);
+          renderStats();
+          renderProjectList();
+          renderDetail();
+          setProjectTab("releases");
+          showToast("Deployed link added.");
+        } catch(error) {
+          console.error("Deployed link saved but project data could not refresh:",error);
+          message.textContent=`Deployed link was saved, but the project could not refresh: ${error.message}`;
+          button.disabled=false;
+        }
+      }
+
+      async function deleteProjectRelease(project, releaseId) {
+        const release=project.releases.find((item)=>item.id===releaseId);
+        if(!release)return;
+        if(!window.confirm(`Delete "${release.title===DEPLOYED_LINK_TITLE?"deployed link":release.title}" from this project?`))return;
+        try {
+          const {data,error}=await window.orbitSupabase.from("project_releases")
+            .delete().eq("id",releaseId).eq("project_id",project.id).select("id").single();
+          if(error)throw error;
+          if(!data)throw new Error("The link was not found or you do not have permission to delete it.");
+        } catch(error) {
+          console.error("Could not delete project link:",error);
+          showToast(`Project link could not be deleted: ${error.message}`);
+          return;
+        }
+        if(editingReleaseId===releaseId)editingReleaseId="";
+        try {
+          await loadPortalData(currentUser);
+          renderStats();
+          renderProjectList();
+          renderDetail();
+          setProjectTab("releases");
+          showToast("Project link deleted.");
+        } catch(error) {
+          console.error("Project link deleted but project data could not refresh:",error);
+          showToast(`Project link was deleted, but the project could not refresh: ${error.message}`);
+        }
+      }
+
+      async function addProjectTeamMember(event, project) {
+        event.preventDefault();
+        const form=event.currentTarget;
+        const select=$("#project-team-candidate");
+        const button=form.querySelector('button[type="submit"]');
+        const message=$("#project-team-add-message");
+        const memberId=select.value;
+        if(!memberId||!teamCandidates.some((candidate)=>candidate.id===memberId)) {
+          message.textContent="Select an available employee to add.";
+          return;
+        }
+        button.disabled=true;
+        message.textContent="";
+        try {
+          const {error}=await window.orbitSupabase.from("project_members").insert({
+            project_id:project.id,employee_id:memberId,project_role:"Employee"
+          });
+          if(error)throw error;
+        } catch(error) {
+          console.error("Could not add an employee to the project:",error);
+          message.textContent=`Person could not be added: ${error.message}`;
+          button.disabled=false;
+          return;
+        }
+        try {
+          await loadPortalData(currentUser);
+          renderStats();
+          renderProjectList();
+          renderDetail();
+          showToast("Person added to the project.");
+        } catch(error) {
+          console.error("Person added to the project but project data could not refresh:",error);
+          message.textContent=`Person was added, but the project could not refresh: ${error.message}`;
+          button.disabled=false;
         }
       }
 
