@@ -260,7 +260,7 @@
     .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 20px}
     .auth-tab{min-height:40px;margin:0;border:1px solid #dce8de;background:transparent;color:#42634f}
     .auth-tab[aria-selected="true"]{border-color:#287b59;background:#eaf3ec;color:#216849}
-    .auth-form[hidden],.auth-field[hidden]{display:none}
+    .auth-form[hidden],.auth-field[hidden]{display:none!important}
     .auth-submit{margin-top:22px}
 
     /* ERROR AND FOOTER */
@@ -426,6 +426,8 @@
         <form class="auth-form" id="login-form">
           <label for="login-email">Organization email</label>
           <input id="login-email" type="email" autocomplete="username" required>
+          <label for="login-password">Password</label>
+          <input id="login-password" type="password" autocomplete="current-password">
           <label for="login-role">I am logging in as</label>
           <select id="login-role" class="auth-select">
             <option value="employee">Employee</option>
@@ -438,6 +440,10 @@
           <input id="signup-name" type="text" maxlength="100" autocomplete="name" required>
           <label for="signup-email">Organization email</label>
           <input id="signup-email" type="email" autocomplete="email" required>
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" autocomplete="new-password">
+          <label for="signup-confirm-password">Confirm password</label>
+          <input id="signup-confirm-password" type="password" autocomplete="new-password">
           <label for="signup-role">I am signing up as</label>
           <select id="signup-role" class="auth-select">
             <option value="employee">Employee</option>
@@ -547,6 +553,5 @@
       }
     })();
   </script>
-
 </body>
 </html>

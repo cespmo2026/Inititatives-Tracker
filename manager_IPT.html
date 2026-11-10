@@ -2209,12 +2209,17 @@ body:has(#projects-view.active) main {
       .modal-body{padding:14px}
       .modal-header,.modal-actions{padding-right:14px;padding-left:14px}
     }
+    .sidebar{padding-right:12px!important;padding-left:12px!important}
+    .brand{gap:8px;padding:0!important}
+    .brand-logo{width:64px!important;height:64px!important;flex-basis:64px!important}
+    .brand-word{flex:0 0 auto;max-width:none;white-space:nowrap;font-size:13px!important;line-height:1.2}
+    @media(max-width:620px){.brand-logo{width:44px!important;height:44px!important;flex-basis:44px!important}}
 </style>
 </head>
 <body>
   <div class="app">
     <aside class="sidebar">
-      <div class="brand" aria-label="Internal Project Tracker home"><img class="brand-logo" src="./ces_logo.png" alt="CES logo"><span class="brand-word">Internal Project Tracker</span></div>
+      <div class="brand" aria-label="Internal Project Tracker home"><img class="brand-logo" src="./ces_logo.png" alt="CES logo"><span class="brand-word">Internal Project<br>Tracker</span></div>
       <p class="nav-label">MANAGEMENT</p>
       <nav class="nav" aria-label="Manager navigation">
         <button class="nav-button active" type="button" data-view="overview"><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-text">Overview</span></button>
