@@ -485,13 +485,23 @@
       }
 
       function routeProfile(profile) {
-        window.orbitSetIdentity(profile);
-        window.location.replace(profile.role === "manager" ? "./manager_IPT.html" : "./emp_IPT.html");
+        // Strip password_hash before saving profile to sessionStorage
+        const safeProfile = {
+          id: profile.id,
+          display_name: profile.display_name,
+          email: profile.email,
+          role: profile.role
+        };
+        window.orbitSetIdentity(safeProfile);
+        window.location.replace(safeProfile.role === "manager" ? "./manager_IPT.html" : "./emp_IPT.html");
       }
 
       loginTab.addEventListener("click", () => setMode("login"));
       signupTab.addEventListener("click", () => setMode("signup"));
 
+      // ==========================================
+      // 1. LOGIN WITH STRICT PASSWORD & UNCLAIMED CHECK
+      // ==========================================
       loginForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = document.querySelector("#login-submit");
@@ -499,14 +509,31 @@
         message.textContent = "";
         try {
           const email = document.querySelector("#login-email").value.trim().toLowerCase();
+          const password = document.querySelector("#login-password").value;
           const role = document.querySelector("#login-role").value;
+
           const { data, error } = await window.orbitSupabase.from("profiles")
-            .select("id,display_name,email,role")
+            .select("id,display_name,email,role,password_hash")
             .eq("email", email)
             .eq("role", role)
             .maybeSingle();
+
           if (error) throw error;
           if (!data) throw new Error("No profile matches that email and role.");
+
+          // STRICT PASSWORD & UNCLAIMED ACCOUNT CHECK
+          if (
+            !data.password_hash ||
+            data.password_hash === "temporary_hash" ||
+            data.password_hash === "'temporary_hash'"
+          ) {
+            throw new Error("Account not activated. Please switch to Sign up to set your password first.");
+          }
+
+          if (data.password_hash !== password) {
+            throw new Error("Incorrect password. Please try again.");
+          }
+
           routeProfile(data);
         } catch (error) {
           console.error("Profile selection failed:", error);
@@ -516,22 +543,74 @@
         }
       });
 
+      // ==========================================
+      // 2. SIGN UP & CLAIM MANAGER-ADDED ACCOUNTS
+      // ==========================================
       signupForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const button = document.querySelector("#signup-submit");
         button.disabled = true;
         message.textContent = "";
-        const requestedRole = document.querySelector("#signup-role").value;
+
+        const displayName = document.querySelector("#signup-name").value.trim();
         const email = document.querySelector("#signup-email").value.trim().toLowerCase();
+        const password = document.querySelector("#signup-password").value;
+        const confirmPassword = document.querySelector("#signup-confirm-password").value;
+        const requestedRole = document.querySelector("#signup-role").value;
+
         try {
+          if (!password) {
+            throw new Error("Please enter a password.");
+          }
+          if (password !== confirmPassword) {
+            throw new Error("Passwords do not match.");
+          }
+
+          // Check if a manager already pre-added this email
+          const { data: existingProfile, error: lookupError } = await window.orbitSupabase
+            .from("profiles")
+            .select("id,display_name,email,role,password_hash")
+            .eq("email", email)
+            .maybeSingle();
+
+          if (lookupError) throw lookupError;
+
+          if (existingProfile) {
+            // Allow employee to activate their pre-added account
+            if (
+              existingProfile.password_hash === "temporary_hash" ||
+              existingProfile.password_hash === "'temporary_hash'"
+            ) {
+              const { data: updatedProfile, error: updateError } = await window.orbitSupabase
+                .from("profiles")
+                .update({
+                  display_name: displayName,
+                  role: requestedRole,
+                  password_hash: password
+                })
+                .eq("id", existingProfile.id)
+                .select("id,display_name,email,role")
+                .single();
+
+              if (updateError) throw updateError;
+              routeProfile(updatedProfile);
+              return;
+            } else {
+              throw new Error("An active account with this email already exists.");
+            }
+          }
+
+          // Otherwise create a brand-new profile with the chosen password
           const { data, error } = await window.orbitSupabase.from("profiles")
             .insert({
-              display_name: document.querySelector("#signup-name").value.trim(),
+              display_name: displayName,
               email,
-              role: requestedRole
+              role: requestedRole,
+              password_hash: password
             })
             .select("id,display_name,email,role")
             .single();
+
           if (error) throw error;
           routeProfile(data);
         } catch (error) {
@@ -553,5 +632,6 @@
       }
     })();
   </script>
+
 </body>
 </html>
